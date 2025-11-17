@@ -23,9 +23,6 @@
     });
   }
 
-  // -----------------------------
-  // Department → Email
-  // -----------------------------
   const DEPARTMENT_EMAIL = {
     "IT": "Support@specialty1partners.com",
     "CBO - Full Service": "cbo@specialty1partners.com",
@@ -33,9 +30,6 @@
     "RCM - Non Full Service": "rcm@specialty1partners.com"
   };
 
-  // -----------------------------
-  // IT Mappings
-  // -----------------------------
   const IT_SUBCATEGORY_MAP = {
     "PMS / Practice Management System": [
       "Access / Permissions",
@@ -118,7 +112,6 @@
     ]
   };
 
-  // PMS Systems
   const PMS_SYSTEMS = [
     "EagleSoft",
     "EndoVision/Clinivision/OMSVision",
@@ -132,7 +125,6 @@
     "Other (PMS)"
   ];
 
-  // Imaging Systems
   const IMAGING_SYSTEMS = [
     "CRD Dicom",
     "Romexis",
@@ -140,9 +132,6 @@
     "Other (Imaging)"
   ];
 
-  // -----------------------------
-  // Non-IT Departments
-  // -----------------------------
   const CBO_CATEGORIES = [
     "Adjustment Correction Needed",
     "Arestin Xray Request",
@@ -200,9 +189,6 @@
     "Other"
   ];
 
-  // -----------------------------
-  // Department Changed
-  // -----------------------------
   function onDepartmentChange() {
     const dept = byId("department").value;
 
@@ -217,7 +203,6 @@
     const wsInput = byId("workstation");
     const wsHint = byId("ws-hint");
 
-    // Reset
     clearSelect(categorySelect, dept ? "-- Select a category --" : "-- Select a department first --");
     clearSelect(subcategorySelect, "-- Select a category first --");
     clearSelect(systemSelect, "-- Select a system --");
@@ -227,7 +212,6 @@
     systemSelect.classList.add("hidden");
     systemLabel.classList.add("hidden");
 
-    // Workstation visible ONLY for IT
     if (dept === "IT") {
       wsLabel.classList.remove("hidden");
       wsInput.classList.remove("hidden");
@@ -237,8 +221,6 @@
       wsInput.classList.add("hidden");
       wsHint.classList.add("hidden");
     }
-
-    if (!dept) return;
 
     if (dept === "IT") {
       populateSelect(categorySelect, Object.keys(IT_SUBCATEGORY_MAP));
@@ -251,9 +233,6 @@
     }
   }
 
-  // -----------------------------
-  // Category Changed (IT only)
-  // -----------------------------
   function onCategoryChange() {
     const dept = byId("department").value;
     const category = byId("category").value;
@@ -263,7 +242,6 @@
     const subLabel = byId("subcategory-label");
     const systemLabel = byId("system-label");
 
-    // Reset
     clearSelect(subcategorySelect, "-- Select a category first --");
     clearSelect(systemSelect, "-- Select a system --");
 
@@ -274,7 +252,6 @@
 
     if (dept !== "IT" || !category) return;
 
-    // IT subcategories
     const subcats = IT_SUBCATEGORY_MAP[category] || [];
     if (subcats.length > 0) {
       clearSelect(subcategorySelect, "-- Select a subcategory --");
@@ -283,21 +260,17 @@
       subcategorySelect.classList.remove("hidden");
     }
 
-    // PMS / Imaging Systems
     if (category === "PMS / Practice Management System") {
       populateSelect(systemSelect, PMS_SYSTEMS);
-      systemLabel.classList.remove("hidden");
       systemSelect.classList.remove("hidden");
+      systemLabel.classList.remove("hidden");
     } else if (category === "Imaging Software") {
       populateSelect(systemSelect, IMAGING_SYSTEMS);
-      systemLabel.classList.remove("hidden");
       systemSelect.classList.remove("hidden");
+      systemLabel.classList.remove("hidden");
     }
   }
 
-  // -----------------------------
-  // Submit Form → Create Email
-  // -----------------------------
   function onSubmit() {
     const dept = byId("department").value;
     const category = byId("category").value;
@@ -309,42 +282,38 @@
       ? ""
       : byId("system").value;
 
+    const contactName = byId("contactName").value.trim();
     const workstation = byId("workstation").value.trim();
     const callback = byId("callback").value.trim();
     const location = byId("location").value.trim();
     const description = byId("description").value.trim();
 
-    // Validation
     if (!dept) return alert("Please select a Department.");
     if (!category) return alert("Please select a Category.");
-
-    if (dept === "IT" && !workstation) {
-      return alert("Please enter the Workstation Name.");
-    }
-    if (!callback) {
-      return alert("Please enter a Callback Number.");
-    }
+    if (!contactName) return alert("Please enter the Contact Name.");
+    if (dept === "IT" && !workstation) return alert("Please enter the Workstation Name.");
+    if (!callback) return alert("Please enter a Callback Number.");
 
     const toEmail = DEPARTMENT_EMAIL[dept] || DEPARTMENT_EMAIL["IT"];
 
-    // Subject
     let subject = `Ticket – ${dept}: ${category}`;
     if (subcategory) subject += ` – ${subcategory}`;
     if (location) subject += ` – (${location})`;
 
-    // Body
     let body = "";
     body += `<b>Department:</b> ${dept}<br/>`;
     body += `<b>Category:</b> ${category}<br/>`;
 
     if (subcategory) body += `<b>Subcategory:</b> ${subcategory}<br/>`;
     if (system) body += `<b>PMS / Imaging System:</b> ${system}<br/>`;
-    if (location) body += `<b>Location Code:</b> ${location}<br/>`;
+
+    body += `<b>Contact Name:</b> ${contactName}<br/>`;
 
     if (dept === "IT") {
       body += `<b>Workstation:</b> ${workstation}<br/>`;
     }
 
+    if (location) body += `<b>Location Code:</b> ${location}<br/>`;
     body += `<b>Callback Number:</b> ${callback}<br/><br/>`;
     body += `<b>Description:</b><br/>${description.replace(/\n/g,"<br/>")}`;
 
@@ -353,11 +322,13 @@
       subject,
       htmlBody: body
     });
+
+    // Auto-close add-in pane
+    if (Office.context.ui && Office.context.ui.closeContainer) {
+      Office.context.ui.closeContainer();
+    }
   }
 
-  // -----------------------------
-  // Initialize
-  // -----------------------------
   function wireEvents() {
     byId("department").addEventListener("change", onDepartmentChange);
     byId("category").addEventListener("change", onCategoryChange);
