@@ -76,14 +76,6 @@
       resize: vertical;
     }
 
-    small.inline-hint {
-      display: block;
-      font-size: 11px;
-      color: #666;
-      margin-top: -6px;
-      margin-bottom: 10px;
-    }
-
     .hidden {
       display: none;
     }
@@ -116,6 +108,18 @@
       height: 18px;
       opacity: 0.75;
     }
+
+    /* Workstation hint box styling */
+    #ws-hint {
+      background: #eef6ff;
+      border-left: 4px solid #0078d4;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #004578;
+    }
   </style>
 </head>
 
@@ -123,14 +127,12 @@
 
   <div class="card">
     <h2>
-      <!-- Fluent Icon: ClipboardText24 -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M6 3h3.17A3 3 0 0 1 12 1a3 3 0 0 1 2.83 2H18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm5-1a1 1 0 0 0-1 1h2a1 1 0 0 0-1-1Zm0 6h6v2h-6V8Zm0 4h6v2h-6v-2Zm0 4h4v2h-4v-2Z"/></svg>
       Submit Support Ticket
     </h2>
 
     <!-- DEPARTMENT -->
     <label for="department">
-      <!-- BuildingMultiple24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h3v16H5a2 2 0 0 1-2-2V6Zm13-2h-3v16h3a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm-2 5h-2V7h2v2Zm0 3h-2v-2h2v2Zm0 3h-2v-2h2v2Zm4-6h-2V7h2v2Zm0 3h-2v-2h2v2Zm0 3h-2v-2h2v2Z"/></svg>
       Department (Required):
     </label>
@@ -144,7 +146,6 @@
 
     <!-- CATEGORY -->
     <label for="category" class="section-title">
-      <!-- Folder24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M10.59 4H4.75A2.75 2.75 0 0 0 2 6.75v9.5A2.75 2.75 0 0 0 4.75 19h14.5A2.75 2.75 0 0 0 22 16.25V8.5h-7.41l-3-4.5Z"/></svg>
       Issue Category:
     </label>
@@ -154,7 +155,6 @@
 
     <!-- SUBCATEGORY -->
     <label for="subcategory" id="subcategory-label" class="hidden section-title">
-      <!-- PuzzlePiece24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M16.5 2a2.5 2.5 0 1 0 0 5H19v3h-2.5a2.5 2.5 0 1 0 0 5H19v3h-2.5a2.5 2.5 0 1 0 0 5H22V2h-5.5Z"/></svg>
       Subcategory:
     </label>
@@ -164,7 +164,6 @@
 
     <!-- SYSTEM -->
     <label for="system" id="system-label" class="hidden section-title">
-      <!-- Laptop24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10H4V6Zm-2 12h20v2H2v-2Z"/></svg>
       PMS / Imaging System:
     </label>
@@ -172,47 +171,44 @@
       <option value="">-- Select a system --</option>
     </select>
 
-    <!-- Workstation -->
-    <label for="workstation" class="section-title">
-      <!-- Desktop24 icon -->
-      <svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 0-2 2v7h20V7a2 2 0 0 0-2-2H4Zm-2 12h20v2H2v-2Z"/></svg>
-      Workstation Name (Required):
-    </label>
-    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
-    <small class="inline-hint">
-      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as
-      <strong>Device name</strong>.
-    </small>
+    <!-- WORKSTATION (IT ONLY) -->
+    <div id="ws-block">
+      <label id="ws-label" class="hidden section-title">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 0-2 2v7h20V7a2 2 0 0 0-2-2H4Zm-2 12h20v2H2v-2Z"/></svg>
+        Workstation Name (Required):
+      </label>
 
-    <!-- CALLBACK -->
+      <input id="workstation" class="hidden" placeholder="e.g. FRONTDESK01, CLINICPC05">
+
+      <div id="ws-hint" class="hidden">
+        <strong>How to find your workstation name (Windows):</strong><br>
+        Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as
+        <strong>Device name</strong>.
+      </div>
+    </div>
+
+    <!-- CALL BACK -->
     <label for="callback" class="section-title">
-      <!-- Call24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M17 2a3 3 0 0 1 3 3c0 8.28-6.72 15-15 15a3 3 0 1 1-1.5-5.62 1 1 0 0 1 1.03.24l2.2 2.19a1 1 0 0 0 1.34.07 12.05 12.05 0 0 0 6.83-6.83 1 1 0 0 0-.08-1.34L14.4 7.5a1 1 0 0 1-.25-1.03A3 3 0 0 1 17 2Z"/></svg>
       Callback Number (Required):
     </label>
     <input id="callback" placeholder="e.g. 555-123-4567">
 
-    <!-- Location -->
+    <!-- LOCATION -->
     <label for="location" class="section-title">
-      <!-- Tag24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l11 11-7 7L3 11V6Zm5 1a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
       Location Code:
     </label>
-    <input id="location" placeholder="e.g. END073, PO0806, OS0204">
+    <input id="location" placeholder="e.g. END073, PO0806">
 
     <!-- DESCRIPTION -->
     <label for="description" class="section-title">
-      <!-- Edit24 icon -->
       <svg class="icon" viewBox="0 0 24 24"><path d="m15.73 3.3 4.97 4.97-9.9 9.9a1.5 1.5 0 0 1-.53.35l-4.12 1.53a.5.5 0 0 1-.64-.64l1.53-4.12a1.5 1.5 0 0 1 .35-.53l9.9-9.9Z"/></svg>
       Description:
     </label>
     <textarea id="description" rows="5" placeholder="Describe the issue in detail..."></textarea>
 
-    <!-- SUBMIT BUTTON -->
-    <button id="submitBtn">
-      Submit Ticket
-    </button>
-
+    <button id="submitBtn">Submit Ticket</button>
   </div>
 
 </body>
