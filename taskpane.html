@@ -7,47 +7,50 @@
   <script src="taskpane.js"></script>
   <style>
     body { font-family: 'Segoe UI', sans-serif; padding: 10px; }
+    label { font-weight: 600; }
     input, textarea, select, button {
-      width: 100%; margin-top: 4px; margin-bottom: 10px; padding: 6px;
-      border: 1px solid #ccc; border-radius: 4px;
+      width: 100%;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
     button {
-      background-color: #0078d4; color: white; border: none; cursor: pointer;
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
     button:hover { background-color: #005a9e; }
   </style>
 </head>
 <body>
-
   <h3>Submit IT Support Ticket</h3>
 
-  <!-- Issue Category -->
-  <label>Issue Category:</label>
+  <label for="category">Issue Category:</label>
   <select id="category">
-    <option value="">-- Select Category --</option>
-    <option value="email">Email / Outlook</option>
-    <option value="teams">Teams</option>
-    <option value="sharepoint">SharePoint</option>
-    <option value="hardware">Hardware</option>
-    <option value="network">Network / Internet</option>
-
-    <!-- NEW CATEGORIES -->
-    <option value="pms">Practice Management System (PMS)</option>
-    <option value="imaging">Imaging Software</option>
-
-    <option value="other">Other</option>
+    <option value="">-- Select a category --</option>
+    <option value="PMS / Practice Management System">PMS / Practice Management System</option>
+    <option value="Imaging Software">Imaging Software</option>
+    <option value="Email/Outlook">Email/Outlook</option>
+    <option value="Teams">Teams</option>
+    <option value="SharePoint">SharePoint</option>
+    <option value="Hardware">Hardware</option>
+    <option value="Network/Internet">Network/Internet</option>
+    <option value="Other">Other</option>
   </select>
 
-  <!-- NEW Sub-Category -->
-  <label>Software (Sub-Category):</label>
+  <label for="subcategory">Subcategory:</label>
   <select id="subcategory" disabled>
-    <option value="">-- Select a Sub-Category --</option>
+    <option value="">-- Select a category first --</option>
   </select>
 
-  <label>Location Code:</label>
+  <label for="location">Location Code:</label>
   <input id="location" placeholder="e.g. END073"/>
 
-  <label>Description:</label>
+  <label for="description">Description:</label>
   <textarea id="description" rows="5" placeholder="Describe the issue..."></textarea>
 
   <button id="submitBtn">Submit Ticket</button>
