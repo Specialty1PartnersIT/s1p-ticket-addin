@@ -109,6 +109,9 @@
   ];
 
   const IMAGING_SYSTEMS = [
+    "Carestream",
+    "Dexis",
+    "Sidexis",
     "CRD Dicom",
     "Romexis",
     "EZ3D-i",
@@ -378,3 +381,4 @@
     }
   });
 })();
+
