@@ -30,20 +30,22 @@ document.getElementById("category").addEventListener("change", function () {
     const subSelect = document.getElementById("subcategory");
     const selected = this.value;
 
+    // Reset first
     subSelect.innerHTML = `<option value="">-- Select a Sub-Category --</option>`;
+    subSelect.disabled = true;
 
-    if (!subcategories[selected]) {
-        subSelect.disabled = true;
-        return;
-    }
+    // If this category has no subcategories, stop here
+    if (!subcategories[selected]) return;
 
-    subSelect.disabled = false;
+    // Populate subcategory dropdown
     subcategories[selected].forEach(item => {
         const opt = document.createElement("option");
         opt.value = item;
         opt.textContent = item;
         subSelect.appendChild(opt);
     });
+
+    subSelect.disabled = false;
 });
 
 /* ------------------------------------------
