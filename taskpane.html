@@ -5,14 +5,22 @@
   <title>Submit IT Ticket</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <script src="taskpane.js"></script>
+
   <style>
-    body { font-family: 'Segoe UI', sans-serif; padding: 10px; }
-    label { font-weight: 600; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 16px;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+    }
     input, textarea, select, button {
       width: 100%;
+      padding: 8px;
       margin-top: 4px;
-      margin-bottom: 10px;
-      padding: 6px;
+      margin-bottom: 12px;
       border: 1px solid #ccc;
       border-radius: 4px;
       box-sizing: border-box;
@@ -20,15 +28,26 @@
     button {
       background-color: #0078d4;
       color: white;
+      font-size: 15px;
       border: none;
+      border-radius: 4px;
       cursor: pointer;
+      padding: 10px;
     }
-    button:hover { background-color: #005a9e; }
+    button:hover {
+      background-color: #005a9e;
+    }
+    h3 {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
+
 <body>
+
   <h3>Submit IT Support Ticket</h3>
 
+  <!-- CATEGORY -->
   <label for="category">Issue Category:</label>
   <select id="category">
     <option value="">-- Select a category --</option>
@@ -42,17 +61,22 @@
     <option value="Other">Other</option>
   </select>
 
+  <!-- SUBCATEGORY -->
   <label for="subcategory">Subcategory:</label>
   <select id="subcategory" disabled>
     <option value="">-- Select a category first --</option>
   </select>
 
+  <!-- LOCATION CODE -->
   <label for="location">Location Code:</label>
-  <input id="location" placeholder="e.g. END073"/>
+  <input id="location" placeholder="e.g. END073, PO0806, OS0204">
 
+  <!-- DESCRIPTION -->
   <label for="description">Description:</label>
-  <textarea id="description" rows="5" placeholder="Describe the issue..."></textarea>
+  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
 
+  <!-- SUBMIT BUTTON -->
   <button id="submitBtn">Submit Ticket</button>
+
 </body>
 </html>
