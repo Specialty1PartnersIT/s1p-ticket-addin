@@ -23,6 +23,9 @@
     });
   }
 
+  // ---------------------------
+  // Department → Email mapping
+  // ---------------------------
   const DEPARTMENT_EMAIL = {
     "IT": "Support@specialty1partners.com",
     "CBO - Full Service": "cbo@specialty1partners.com",
@@ -30,6 +33,9 @@
     "RCM - Non Full Service": "rcm@specialty1partners.com"
   };
 
+  // -----------------------------------
+  // IT Categories → Subcategories
+  // -----------------------------------
   const IT_SUBCATEGORY_MAP = {
     "PMS / Practice Management System": [
       "Access / Permissions",
@@ -112,6 +118,9 @@
     ]
   };
 
+  // -----------------------------
+  // PMS / Imaging System Lists
+  // -----------------------------
   const PMS_SYSTEMS = [
     "EagleSoft",
     "EndoVision/Clinivision/OMSVision",
@@ -132,6 +141,9 @@
     "Other (Imaging)"
   ];
 
+  // -------------------------
+  // CBO Categories
+  // -------------------------
   const CBO_CATEGORIES = [
     "Adjustment Correction Needed",
     "Arestin Xray Request",
@@ -155,12 +167,15 @@
     "Other"
   ];
 
+  // -------------------------
+  // Payor Relations Categories
+  // -------------------------
   const PAYOR_RELATIONS_CATEGORIES = [
     "Add Payor",
     "Claim Review",
     "Fee Review Request",
     "Fee Schedule discrepancy",
-    "Leasing Inquires",
+    "Leasing Inquiries",
     "Medical Request",
     "Meeting Request",
     "Miscellaneous",
@@ -182,6 +197,9 @@
     "Other"
   ];
 
+  // -------------------------
+  // RCM Categories
+  // -------------------------
   const RCM_CATEGORIES = [
     "Collection Placement",
     "RCM General questions",
@@ -189,6 +207,9 @@
     "Other"
   ];
 
+  // -------------------------
+  // Handle Department Change
+  // -------------------------
   function onDepartmentChange() {
     const dept = byId("department").value;
 
@@ -212,6 +233,7 @@
     systemSelect.classList.add("hidden");
     systemLabel.classList.add("hidden");
 
+    // Workstation field visible only for IT
     if (dept === "IT") {
       wsLabel.classList.remove("hidden");
       wsInput.classList.remove("hidden");
@@ -221,6 +243,8 @@
       wsInput.classList.add("hidden");
       wsHint.classList.add("hidden");
     }
+
+    if (!dept) return;
 
     if (dept === "IT") {
       populateSelect(categorySelect, Object.keys(IT_SUBCATEGORY_MAP));
@@ -233,6 +257,9 @@
     }
   }
 
+  // -------------------------
+  // Handle Category Change
+  // -------------------------
   function onCategoryChange() {
     const dept = byId("department").value;
     const category = byId("category").value;
@@ -252,6 +279,7 @@
 
     if (dept !== "IT" || !category) return;
 
+    // Subcategories for IT categories
     const subcats = IT_SUBCATEGORY_MAP[category] || [];
     if (subcats.length > 0) {
       clearSelect(subcategorySelect, "-- Select a subcategory --");
@@ -260,6 +288,7 @@
       subcategorySelect.classList.remove("hidden");
     }
 
+    // PMS / Imaging system list
     if (category === "PMS / Practice Management System") {
       populateSelect(systemSelect, PMS_SYSTEMS);
       systemSelect.classList.remove("hidden");
@@ -271,6 +300,9 @@
     }
   }
 
+  // -------------------------
+  // Submit Ticket
+  // -------------------------
   function onSubmit() {
     const dept = byId("department").value;
     const category = byId("category").value;
@@ -288,6 +320,7 @@
     const location = byId("location").value.trim();
     const description = byId("description").value.trim();
 
+    // Required fields
     if (!dept) return alert("Please select a Department.");
     if (!category) return alert("Please select a Category.");
     if (!contactName) return alert("Please enter the Contact Name.");
@@ -323,18 +356,43 @@
       htmlBody: body
     });
 
-    // Auto-close add-in pane
+    // Close the taskpane after sending
     if (Office.context.ui && Office.context.ui.closeContainer) {
       Office.context.ui.closeContainer();
     }
   }
 
+  // -------------------------
+  // Wire events + Auto-fill Contact Name + Auto-save Contact Name
+  // -------------------------
   function wireEvents() {
     byId("department").addEventListener("change", onDepartmentChange);
     byId("category").addEventListener("change", onCategoryChange);
     byId("submitBtn").addEventListener("click", onSubmit);
+
+    const contactInput = byId("contactName");
+
+    // 1. Load saved name
+    const savedName = localStorage.getItem("contactName");
+    if (savedName) {
+      contactInput.value = savedName;
+    } else {
+      // 2. Fallback → load from Outlook profile
+      const userProfile = Office.context.mailbox?.userProfile;
+      if (userProfile && userProfile.displayName) {
+        contactInput.value = userProfile.displayName;
+      }
+    }
+
+    // 3. Save automatically as user types
+    contactInput.addEventListener("input", () => {
+      localStorage.setItem("contactName", contactInput.value.trim());
+    });
   }
 
+  // -------------------------
+  // Initialize Add-in
+  // -------------------------
   Office.onReady(() => {
     if (document.readyState === "complete") wireEvents();
     else document.addEventListener("DOMContentLoaded", wireEvents);
