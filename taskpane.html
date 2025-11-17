@@ -18,15 +18,30 @@
   </style>
 </head>
 <body>
+
   <h3>Submit IT Support Ticket</h3>
+
+  <!-- Issue Category -->
   <label>Issue Category:</label>
   <select id="category">
-    <option>Email/Outlook</option>
-    <option>Teams</option>
-    <option>SharePoint</option>
-    <option>Hardware</option>
-    <option>Network/Internet</option>
-    <option>Other</option>
+    <option value="">-- Select Category --</option>
+    <option value="email">Email / Outlook</option>
+    <option value="teams">Teams</option>
+    <option value="sharepoint">SharePoint</option>
+    <option value="hardware">Hardware</option>
+    <option value="network">Network / Internet</option>
+
+    <!-- NEW CATEGORIES -->
+    <option value="pms">Practice Management System (PMS)</option>
+    <option value="imaging">Imaging Software</option>
+
+    <option value="other">Other</option>
+  </select>
+
+  <!-- NEW Sub-Category -->
+  <label>Software (Sub-Category):</label>
+  <select id="subcategory" disabled>
+    <option value="">-- Select a Sub-Category --</option>
   </select>
 
   <label>Location Code:</label>
