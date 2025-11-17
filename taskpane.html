@@ -2,116 +2,218 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Submit IT Ticket</title>
+  <title>Submit Support Ticket</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <script src="taskpane.js"></script>
 
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      padding: 16px;
+      background: #f5f5f7;
+      padding: 20px;
     }
-    label {
+
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      border: 1px solid #e1e1e1;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 20px;
       font-weight: 600;
-      margin-top: 10px;
-      display: block;
+      color: #323130;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e1e1e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    input, textarea, select, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      margin-bottom: 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #201f1f;
+      margin-top: 18px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    label {
       font-size: 13px;
+      font-weight: 600;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #323130;
     }
-    button {
-      background-color: #0078d4;
-      color: white;
-      font-size: 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      padding: 10px;
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid #c8c6c4;
+      background: #ffffff;
+      transition: border 0.15s;
     }
-    button:hover {
-      background-color: #005a9e;
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #0078d4;
+      box-shadow: 0 0 0 1px #0078d4;
     }
-    h3 {
-      margin-bottom: 20px;
+
+    textarea {
+      resize: vertical;
     }
-    small {
+
+    small.inline-hint {
+      display: block;
       font-size: 11px;
       color: #666;
+      margin-top: -6px;
+      margin-bottom: 10px;
     }
-    .inline-hint {
-      margin-top: -8px;
-      margin-bottom: 12px;
-      display: block;
-    }
+
     .hidden {
       display: none;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      background-color: #0078d4;
+      color: #ffffff;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background-color: #106ebe;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    button:active {
+      background-color: #005a9e;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.75;
     }
   </style>
 </head>
 
 <body>
 
-  <h3>Submit Support Ticket</h3>
+  <div class="card">
+    <h2>
+      <!-- Fluent Icon: ClipboardText24 -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 3h3.17A3 3 0 0 1 12 1a3 3 0 0 1 2.83 2H18a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm5-1a1 1 0 0 0-1 1h2a1 1 0 0 0-1-1Zm0 6h6v2h-6V8Zm0 4h6v2h-6v-2Zm0 4h4v2h-4v-2Z"/></svg>
+      Submit Support Ticket
+    </h2>
 
-  <!-- DEPARTMENT -->
-  <label for="department">Department (Required):</label>
-  <select id="department">
-    <option value="">-- Select a department --</option>
-    <option value="IT">IT</option>
-    <option value="CBO - Full Service">CBO - Full Service</option>
-    <option value="Payor Relations">Payor Relations</option>
-    <option value="RCM - Non Full Service">RCM - Non Full Service</option>
-  </select>
+    <!-- DEPARTMENT -->
+    <label for="department">
+      <!-- BuildingMultiple24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h3v16H5a2 2 0 0 1-2-2V6Zm13-2h-3v16h3a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm-2 5h-2V7h2v2Zm0 3h-2v-2h2v2Zm0 3h-2v-2h2v2Zm4-6h-2V7h2v2Zm0 3h-2v-2h2v2Zm0 3h-2v-2h2v2Z"/></svg>
+      Department (Required):
+    </label>
+    <select id="department">
+      <option value="">-- Select a department --</option>
+      <option value="IT">IT</option>
+      <option value="CBO - Full Service">CBO - Full Service</option>
+      <option value="Payor Relations">Payor Relations</option>
+      <option value="RCM - Non Full Service">RCM - Non Full Service</option>
+    </select>
 
-  <!-- CATEGORY -->
-  <label for="category">Issue Category:</label>
-  <select id="category">
-    <option value="">-- Select a department first --</option>
-  </select>
+    <!-- CATEGORY -->
+    <label for="category" class="section-title">
+      <!-- Folder24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M10.59 4H4.75A2.75 2.75 0 0 0 2 6.75v9.5A2.75 2.75 0 0 0 4.75 19h14.5A2.75 2.75 0 0 0 22 16.25V8.5h-7.41l-3-4.5Z"/></svg>
+      Issue Category:
+    </label>
+    <select id="category">
+      <option value="">-- Select a department first --</option>
+    </select>
 
-  <!-- SUBCATEGORY (IT ONLY) -->
-  <label for="subcategory" id="subcategory-label" class="hidden">Subcategory:</label>
-  <select id="subcategory" class="hidden">
-    <option value="">-- Select a category first --</option>
-  </select>
+    <!-- SUBCATEGORY -->
+    <label for="subcategory" id="subcategory-label" class="hidden section-title">
+      <!-- PuzzlePiece24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M16.5 2a2.5 2.5 0 1 0 0 5H19v3h-2.5a2.5 2.5 0 1 0 0 5H19v3h-2.5a2.5 2.5 0 1 0 0 5H22V2h-5.5Z"/></svg>
+      Subcategory:
+    </label>
+    <select id="subcategory" class="hidden">
+      <option value="">-- Select a category first --</option>
+    </select>
 
-  <!-- SUB-SUBCATEGORY FOR PMS / IMAGING (IT ONLY) -->
-  <label for="system" id="system-label" class="hidden">PMS / Imaging System:</label>
-  <select id="system" class="hidden">
-    <option value="">-- Select a system --</option>
-  </select>
+    <!-- SYSTEM -->
+    <label for="system" id="system-label" class="hidden section-title">
+      <!-- Laptop24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10H4V6Zm-2 12h20v2H2v-2Z"/></svg>
+      PMS / Imaging System:
+    </label>
+    <select id="system" class="hidden">
+      <option value="">-- Select a system --</option>
+    </select>
 
-<!-- WORKSTATION NAME (REQUIRED) -->
-<label for="workstation">Workstation Name (Required):</label>
-<input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
-<small class="inline-hint">
-  Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as
-  <strong>Device name</strong>.
-</small>
+    <!-- Workstation -->
+    <label for="workstation" class="section-title">
+      <!-- Desktop24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 0-2 2v7h20V7a2 2 0 0 0-2-2H4Zm-2 12h20v2H2v-2Z"/></svg>
+      Workstation Name (Required):
+    </label>
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+    <small class="inline-hint">
+      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as
+      <strong>Device name</strong>.
+    </small>
 
+    <!-- CALLBACK -->
+    <label for="callback" class="section-title">
+      <!-- Call24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17 2a3 3 0 0 1 3 3c0 8.28-6.72 15-15 15a3 3 0 1 1-1.5-5.62 1 1 0 0 1 1.03.24l2.2 2.19a1 1 0 0 0 1.34.07 12.05 12.05 0 0 0 6.83-6.83 1 1 0 0 0-.08-1.34L14.4 7.5a1 1 0 0 1-.25-1.03A3 3 0 0 1 17 2Z"/></svg>
+      Callback Number (Required):
+    </label>
+    <input id="callback" placeholder="e.g. 555-123-4567">
 
-  <!-- CALLBACK NUMBER (REQUIRED) -->
-  <label for="callback">Callback Number (Required):</label>
-  <input id="callback" placeholder="e.g. 555-123-4567">
+    <!-- Location -->
+    <label for="location" class="section-title">
+      <!-- Tag24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l11 11-7 7L3 11V6Zm5 1a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+      Location Code:
+    </label>
+    <input id="location" placeholder="e.g. END073, PO0806, OS0204">
 
-  <!-- LOCATION CODE -->
-  <label for="location">Location Code:</label>
-  <input id="location" placeholder="e.g. END073, PO0806, OS0204">
+    <!-- DESCRIPTION -->
+    <label for="description" class="section-title">
+      <!-- Edit24 icon -->
+      <svg class="icon" viewBox="0 0 24 24"><path d="m15.73 3.3 4.97 4.97-9.9 9.9a1.5 1.5 0 0 1-.53.35l-4.12 1.53a.5.5 0 0 1-.64-.64l1.53-4.12a1.5 1.5 0 0 1 .35-.53l9.9-9.9Z"/></svg>
+      Description:
+    </label>
+    <textarea id="description" rows="5" placeholder="Describe the issue in detail..."></textarea>
 
-  <!-- DESCRIPTION -->
-  <label for="description">Description:</label>
-  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
+    <!-- SUBMIT BUTTON -->
+    <button id="submitBtn">
+      Submit Ticket
+    </button>
 
-  <!-- SUBMIT BUTTON -->
-  <button id="submitBtn">Submit Ticket</button>
+  </div>
 
 </body>
 </html>
-
