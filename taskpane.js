@@ -145,22 +145,36 @@ function updateSubcategories(category, subSelect) {
 // Send Ticket Email
 // --------------------------
 function sendTicket() {
-  const category = document.getElementById("category").value || "";
-  const subcategory = document.getElementById("subcategory").value || "";
-  const location = document.getElementById("location").value || "";
-  const description = document.getElementById("description").value || "";
+  const category = document.getElementById("category").value;
+  const subcategory = document.getElementById("subcategory").value;
+  const workstation = document.getElementById("workstation").value.trim();
+  const callback = document.getElementById("callback").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
+
+  // REQUIRED FIELDS VALIDATION
+  if (!workstation) {
+    alert("Please enter the workstation name.");
+    return;
+  }
+
+  if (!callback) {
+    alert("Please enter a callback phone number.");
+    return;
+  }
 
   const user = Office.context.mailbox.userProfile.displayName;
   const email = Office.context.mailbox.userProfile.emailAddress;
 
-  let subject = "New IT Support Ticket";
-  if (category) subject += " - " + category;
-  if (subcategory) subject += " - " + subcategory;
+  let subject = `New IT Support Ticket - ${category}`;
+  if (subcategory) subject += ` - ${subcategory}`;
 
   const htmlBody = `
     <p><b>User:</b> ${user} (${email})</p>
     <p><b>Category:</b> ${category}</p>
     <p><b>Subcategory:</b> ${subcategory}</p>
+    <p><b>Workstation:</b> ${workstation}</p>
+    <p><b>Callback:</b> ${callback}</p>
     <p><b>Location Code:</b> ${location}</p>
     <p><b>Description:</b><br>${description}</p>
   `;
