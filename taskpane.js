@@ -1,187 +1,151 @@
-Office.onReady(() => {
-  document.getElementById("submitBtn").onclick = sendTicket;
-
-  const categorySelect = document.getElementById("category");
-  const subcategorySelect = document.getElementById("subcategory");
-
-  categorySelect.addEventListener("change", () => {
-    updateSubcategories(categorySelect.value, subcategorySelect);
-  });
-});
-
-// --------------------------
-// FULL SUBCATEGORY MAP
-// --------------------------
-const SUBCATEGORY_MAP = {
-
+// ---------------------------
+// CATEGORY → SUBCATEGORY MAP
+// ---------------------------
+const categoryMap = {
   "PMS / Practice Management System": [
-    "EagleSoft",
-    "EndoVision/Clinivision/OMSVision",
-    "WinOMS",
-    "TDO",
-    "WinDent",
-    "Dentrix",
-    "PBS Endo",
-    "DSN",
-    "Denticon",
-    "Other (PMS)"
+    "Login Issues",
+    "Data Issues",
+    "Software Error",
+    "Updates Needed"
   ],
-
   "Imaging Software": [
-    "CRD Dicom",
-    "Romexis",
-    "EZ3D-i",
-    "Dexis",
-    "Sidexis",
-    "Carestream",
-    "XDR",
-    "Vatech EzDent",
-    "VistaScan",
-    "Other (Imaging)"
+    "Sensor Issues",
+    "Acquisition Errors",
+    "Software Crash",
+    "Integration Problems"
   ],
-
   "Email/Outlook": [
-    "Outlook Desktop (Windows)",
-    "Outlook Desktop (Mac)",
-    "Outlook Mobile (iOS/Android)",
-    "Shared Mailbox",
-    "Distribution List",
-    "Send/Receive Problems",
-    "Calendar Issues",
-    "Add-ins Not Loading",
-    "Authentication / MFA",
-    "Other (Email)"
+    "Send/Receive Issues",
+    "Login Problems",
+    "Add-in Issues",
+    "Calendar Problems"
   ],
-
   "Teams": [
     "Chat Issues",
-    "Teams Meetings",
-    "Devices (Headsets/Webcams)",
-    "Teams Phone",
-    "Channels / Permissions",
-    "File Sharing Issues",
-    "Notifications",
-    "Login Errors",
-    "Other (Teams)"
+    "Meeting Problems",
+    "Audio/Video Issues",
+    "Login Issues"
   ],
-
   "SharePoint": [
+    "Access Issue",
+    "Sync Problems",
     "Permissions",
-    "Missing Files",
-    "Sync Issues (OneDrive)",
-    "Site Access Issues",
-    "Document Versioning",
-    "SharePoint Lists / Forms",
-    "Other (SharePoint)"
+    "Document Issues"
   ],
-
   "Hardware": [
-    "Workstation / PC Issue",
-    "Laptop",
-    "Printer",
-    "Scanner",
-    "Camera",
-    "Label Printer",
-    "Card Reader",
-    "Signature Pad",
-    "Monitor",
-    "Keyboard / Mouse",
-    "Other (Hardware)"
+    "Printer Issue",
+    "Scanner Issue",
+    "Computer Won't Boot",
+    "Peripheral Issue"
   ],
-
   "Network/Internet": [
-    "Internet Down",
-    "WiFi Issues",
-    "Firewall / Security",
-    "VPN",
-    "DNS Issues",
-    "Slowness / Latency",
-    "Cannot Reach Cloud Services",
-    "Local Server Unreachable",
-    "Other (Network)"
+    "Connectivity",
+    "Slowness",
+    "VPN Issues",
+    "Drops/Outages"
+  ],
+  "Other": [
+    "General Issue",
+    "Unknown Issue"
   ],
 
-  "Other": [
-    "New Employee Setup",
-    "User Access Request",
-    "Password Reset",
-    "Software Install",
-    "General Question",
-    "Other (Misc)"
+  // ---------------------------
+  // NEW — RingCentral
+  // ---------------------------
+  "RingCentral": [
+    "Phone hardware",
+    "Call quality",
+    "Fax send/receive",
+    "Text send/receive",
+    "Early office closure / Schedule changes"
+  ],
+
+  // ---------------------------
+  // NEW — Security
+  // ---------------------------
+  "Security": [
+    "Breach",
+    "Incident",
+    "Non-Critical"
+  ],
+
+  // ---------------------------
+  // NEW — Acumen
+  // ---------------------------
+  "Acumen": [
+    "Access/Permissions",
+    "Data Integrity",
+    "New Reports",
+    "Report Edits"
   ]
 };
 
-// --------------------------
-// Populate Subcategories
-// --------------------------
-function updateSubcategories(category, subSelect) {
-  subSelect.innerHTML = "";
-  subSelect.disabled = true;
+// ---------------------------
+// INITIALIZE SUBCATEGORY LOGIC
+// ---------------------------
+window.onload = function () {
+  const categoryDropdown = document.getElementById("category");
+  const subcategoryDropdown = document.getElementById("subcategory");
 
-  if (!category || !SUBCATEGORY_MAP[category]) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = "-- Select a category first --";
-    subSelect.appendChild(opt);
-    return;
-  }
+  categoryDropdown.addEventListener("change", () => {
+    const selected = categoryDropdown.value;
 
-  subSelect.disabled = false;
+    // Clear previous options
+    subcategoryDropdown.innerHTML = "";
+    subcategoryDropdown.disabled = true;
 
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = "-- Select a subcategory --";
-  subSelect.appendChild(placeholder);
+    if (!selected || !categoryMap[selected]) {
+      subcategoryDropdown.innerHTML =
+        `<option value="">-- Select a category first --</option>`;
+      return;
+    }
 
-  SUBCATEGORY_MAP[category].forEach(sc => {
-    const opt = document.createElement("option");
-    opt.value = sc;
-    opt.textContent = sc;
-    subSelect.appendChild(opt);
+    // Populate new subcategories
+    categoryMap[selected].forEach(sub => {
+      const opt = document.createElement("option");
+      opt.value = sub;
+      opt.textContent = sub;
+      subcategoryDropdown.appendChild(opt);
+    });
+
+    subcategoryDropdown.disabled = false;
   });
-}
 
-// --------------------------
-// Send Ticket Email
-// --------------------------
-function sendTicket() {
+  // ---------------------------
+  // SUBMIT BUTTON HANDLER
+  // ---------------------------
+  document.getElementById("submitBtn").addEventListener("click", submitTicket);
+};
+
+// ---------------------------
+// TICKET SUBMISSION HANDLER
+// ---------------------------
+function submitTicket() {
   const category = document.getElementById("category").value;
   const subcategory = document.getElementById("subcategory").value;
-  const workstation = document.getElementById("workstation").value.trim();
-  const callback = document.getElementById("callback").value.trim();
-  const location = document.getElementById("location").value.trim();
-  const description = document.getElementById("description").value.trim();
+  const workstation = document.getElementById("workstation").value;
+  const callback = document.getElementById("callback").value;
+  const location = document.getElementById("location").value;
+  const description = document.getElementById("description").value;
 
-  // REQUIRED FIELDS VALIDATION
-  if (!workstation) {
-    alert("Please enter the workstation name.");
-    return;
-  }
+  // Basic validation
+  if (!category) return alert("Please select a category.");
+  if (!subcategory) return alert("Please select a subcategory.");
+  if (!workstation) return alert("Workstation name is required.");
+  if (!callback) return alert("Callback number is required.");
 
-  if (!callback) {
-    alert("Please enter a callback phone number.");
-    return;
-  }
-
-  const user = Office.context.mailbox.userProfile.displayName;
-  const email = Office.context.mailbox.userProfile.emailAddress;
-
-  let subject = `New IT Support Ticket - ${category}`;
-  if (subcategory) subject += ` - ${subcategory}`;
-
-  const htmlBody = `
-    <p><b>User:</b> ${user} (${email})</p>
-    <p><b>Category:</b> ${category}</p>
-    <p><b>Subcategory:</b> ${subcategory}</p>
-    <p><b>Workstation:</b> ${workstation}</p>
-    <p><b>Callback:</b> ${callback}</p>
-    <p><b>Location Code:</b> ${location}</p>
-    <p><b>Description:</b><br>${description}</p>
+  const body = `
+Category: ${category}
+Subcategory: ${subcategory}
+Workstation: ${workstation}
+Callback: ${callback}
+Location: ${location}
+Description:
+${description}
   `;
 
-  Office.context.mailbox.displayNewMessageForm({
-    toRecipients: ["support@specialty1partners.com"],
-    subject: subject,
-    htmlBody: htmlBody
+  // Insert into email or send to an API — whatever your workflow is
+  Office.context.mailbox.item.body.setAsync(body, { coercionType: "text" }, () => {
+    alert("Ticket information added to the email body.");
   });
 }
