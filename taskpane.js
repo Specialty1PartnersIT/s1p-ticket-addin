@@ -1,9 +1,31 @@
-// taskpane.js
-
 /* global Office */
 
 (() => {
-  // Map department -> email address
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function clearSelect(select, placeholderText) {
+    select.innerHTML = "";
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = placeholderText;
+    select.appendChild(opt);
+  }
+
+  function populateSelect(select, options) {
+    options.forEach(value => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = value;
+      select.appendChild(opt);
+    });
+  }
+
+  // -----------------------------
+  // Department → Email
+  // -----------------------------
   const DEPARTMENT_EMAIL = {
     "IT": "Support@specialty1partners.com",
     "CBO - Full Service": "cbo@specialty1partners.com",
@@ -11,7 +33,9 @@
     "RCM - Non Full Service": "rcm@specialty1partners.com"
   };
 
-  // IT category -> subcategories (issue type level)
+  // -----------------------------
+  // IT Mappings
+  // -----------------------------
   const IT_SUBCATEGORY_MAP = {
     "PMS / Practice Management System": [
       "Access / Permissions",
@@ -94,7 +118,7 @@
     ]
   };
 
-  // PMS & Imaging systems (sub-subcategory)
+  // PMS Systems
   const PMS_SYSTEMS = [
     "EagleSoft",
     "EndoVision/Clinivision/OMSVision",
@@ -108,17 +132,17 @@
     "Other (PMS)"
   ];
 
+  // Imaging Systems
   const IMAGING_SYSTEMS = [
-    "Carestream",
-    "Dexis",
-    "Sidexis",
     "CRD Dicom",
     "Romexis",
     "EZ3D-i",
     "Other (Imaging)"
   ];
 
-  // Department-specific category lists (no subcategories for these three)
+  // -----------------------------
+  // Non-IT Departments
+  // -----------------------------
   const CBO_CATEGORIES = [
     "Adjustment Correction Needed",
     "Arestin Xray Request",
@@ -176,71 +200,60 @@
     "Other"
   ];
 
-  function byId(id) {
-    return document.getElementById(id);
-  }
-
-  function clearSelect(select, placeholderText) {
-    select.innerHTML = "";
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = placeholderText;
-    select.appendChild(opt);
-  }
-
-  function populateSelect(select, options) {
-    options.forEach(value => {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = value;
-      select.appendChild(opt);
-    });
-  }
-
-  // Handle Department change
+  // -----------------------------
+  // Department Changed
+  // -----------------------------
   function onDepartmentChange() {
-    const deptSelect = byId("department");
-    const dept = deptSelect.value;
+    const dept = byId("department").value;
 
     const categorySelect = byId("category");
     const subcategorySelect = byId("subcategory");
     const systemSelect = byId("system");
+
     const subLabel = byId("subcategory-label");
     const systemLabel = byId("system-label");
 
-    // Reset category & below
-    clearSelect(categorySelect, dept ? "-- Select a category --" : "-- Select a department first --");
+    const wsLabel = byId("ws-label");
+    const wsInput = byId("workstation");
+    const wsHint = byId("ws-hint");
 
-    // Hide subcategory & system by default
+    // Reset
+    clearSelect(categorySelect, dept ? "-- Select a category --" : "-- Select a department first --");
+    clearSelect(subcategorySelect, "-- Select a category first --");
+    clearSelect(systemSelect, "-- Select a system --");
+
     subcategorySelect.classList.add("hidden");
     subLabel.classList.add("hidden");
     systemSelect.classList.add("hidden");
     systemLabel.classList.add("hidden");
-    clearSelect(subcategorySelect, "-- Select a category first --");
-    clearSelect(systemSelect, "-- Select a system --");
 
-    if (!dept) {
-      return;
+    // Workstation visible ONLY for IT
+    if (dept === "IT") {
+      wsLabel.classList.remove("hidden");
+      wsInput.classList.remove("hidden");
+      wsHint.classList.remove("hidden");
+    } else {
+      wsLabel.classList.add("hidden");
+      wsInput.classList.add("hidden");
+      wsHint.classList.add("hidden");
     }
 
+    if (!dept) return;
+
     if (dept === "IT") {
-      // IT uses categories + subcategories
-      const itCategories = Object.keys(IT_SUBCATEGORY_MAP);
-      populateSelect(categorySelect, itCategories);
-      categorySelect.disabled = false;
+      populateSelect(categorySelect, Object.keys(IT_SUBCATEGORY_MAP));
     } else if (dept === "CBO - Full Service") {
       populateSelect(categorySelect, CBO_CATEGORIES);
-      categorySelect.disabled = false;
     } else if (dept === "Payor Relations") {
       populateSelect(categorySelect, PAYOR_RELATIONS_CATEGORIES);
-      categorySelect.disabled = false;
     } else if (dept === "RCM - Non Full Service") {
       populateSelect(categorySelect, RCM_CATEGORIES);
-      categorySelect.disabled = false;
     }
   }
 
-  // Handle Category change (primarily for IT)
+  // -----------------------------
+  // Category Changed (IT only)
+  // -----------------------------
   function onCategoryChange() {
     const dept = byId("department").value;
     const category = byId("category").value;
@@ -253,50 +266,45 @@
     // Reset
     clearSelect(subcategorySelect, "-- Select a category first --");
     clearSelect(systemSelect, "-- Select a system --");
+
     subcategorySelect.classList.add("hidden");
     subLabel.classList.add("hidden");
     systemSelect.classList.add("hidden");
     systemLabel.classList.add("hidden");
 
-    if (!dept || !category) {
-      return;
-    }
+    if (dept !== "IT" || !category) return;
 
-    if (dept !== "IT") {
-      // Non-IT departments: no subcategories
-      return;
-    }
-
-    // IT department: show subcategories for this category
+    // IT subcategories
     const subcats = IT_SUBCATEGORY_MAP[category] || [];
     if (subcats.length > 0) {
       clearSelect(subcategorySelect, "-- Select a subcategory --");
       populateSelect(subcategorySelect, subcats);
-      subcategorySelect.classList.remove("hidden");
       subLabel.classList.remove("hidden");
+      subcategorySelect.classList.remove("hidden");
     }
 
-    // PMS / Imaging specific system dropdown
+    // PMS / Imaging Systems
     if (category === "PMS / Practice Management System") {
-      clearSelect(systemSelect, "-- Select a PMS system --");
       populateSelect(systemSelect, PMS_SYSTEMS);
-      systemSelect.classList.remove("hidden");
       systemLabel.classList.remove("hidden");
+      systemSelect.classList.remove("hidden");
     } else if (category === "Imaging Software") {
-      clearSelect(systemSelect, "-- Select an imaging system --");
       populateSelect(systemSelect, IMAGING_SYSTEMS);
-      systemSelect.classList.remove("hidden");
       systemLabel.classList.remove("hidden");
+      systemSelect.classList.remove("hidden");
     }
   }
 
-  // Build and open the email
+  // -----------------------------
+  // Submit Form → Create Email
+  // -----------------------------
   function onSubmit() {
     const dept = byId("department").value;
     const category = byId("category").value;
     const subcategory = byId("subcategory").classList.contains("hidden")
       ? ""
       : byId("subcategory").value;
+
     const system = byId("system").classList.contains("hidden")
       ? ""
       : byId("system").value;
@@ -306,79 +314,59 @@
     const location = byId("location").value.trim();
     const description = byId("description").value.trim();
 
-    // Basic validation
-    if (!dept) {
-      alert("Please select a Department.");
-      return;
-    }
-    if (!category) {
-      alert("Please select a Category.");
-      return;
-    }
-    if (!workstation) {
-      alert("Please enter the Workstation Name.");
-      return;
+    // Validation
+    if (!dept) return alert("Please select a Department.");
+    if (!category) return alert("Please select a Category.");
+
+    if (dept === "IT" && !workstation) {
+      return alert("Please enter the Workstation Name.");
     }
     if (!callback) {
-      alert("Please enter a Callback Number.");
-      return;
+      return alert("Please enter a Callback Number.");
     }
 
     const toEmail = DEPARTMENT_EMAIL[dept] || DEPARTMENT_EMAIL["IT"];
 
-    // Build subject: Ticket – {Department}: {Category} – {Subcategory} – (Location)
-    const subjectParts = [];
-    subjectParts.push(`Ticket – ${dept}: ${category}`);
-    if (subcategory) {
-      subjectParts.push(subcategory);
-    }
+    // Subject
+    let subject = `Ticket – ${dept}: ${category}`;
+    if (subcategory) subject += ` – ${subcategory}`;
+    if (location) subject += ` – (${location})`;
 
-    let subject = subjectParts.join(" – ");
-    if (location) {
-      subject += ` – (${location})`;
-    }
-
-    // Build HTML body
+    // Body
     let body = "";
     body += `<b>Department:</b> ${dept}<br/>`;
     body += `<b>Category:</b> ${category}<br/>`;
-    if (subcategory) {
-      body += `<b>Subcategory:</b> ${subcategory}<br/>`;
+
+    if (subcategory) body += `<b>Subcategory:</b> ${subcategory}<br/>`;
+    if (system) body += `<b>PMS / Imaging System:</b> ${system}<br/>`;
+    if (location) body += `<b>Location Code:</b> ${location}<br/>`;
+
+    if (dept === "IT") {
+      body += `<b>Workstation:</b> ${workstation}<br/>`;
     }
-    if (system) {
-      body += `<b>PMS / Imaging System:</b> ${system}<br/>`;
-    }
-    if (location) {
-      body += `<b>Location Code:</b> ${location}<br/>`;
-    }
-    body += `<b>Workstation:</b> ${workstation}<br/>`;
+
     body += `<b>Callback Number:</b> ${callback}<br/><br/>`;
-    body += `<b>Description:</b><br/>`;
-    body += (description ? description.replace(/\n/g, "<br/>") : "(no description provided)");
+    body += `<b>Description:</b><br/>${description.replace(/\n/g,"<br/>")}`;
 
     Office.context.mailbox.displayNewMessageForm({
       toRecipients: [toEmail],
-      subject: subject,
+      subject,
       htmlBody: body
     });
   }
 
+  // -----------------------------
+  // Initialize
+  // -----------------------------
   function wireEvents() {
-    const deptSelect = byId("department");
-    const categorySelect = byId("category");
-    const submitBtn = byId("submitBtn");
-
-    deptSelect.addEventListener("change", onDepartmentChange);
-    categorySelect.addEventListener("change", onCategoryChange);
-    submitBtn.addEventListener("click", onSubmit);
+    byId("department").addEventListener("change", onDepartmentChange);
+    byId("category").addEventListener("change", onCategoryChange);
+    byId("submitBtn").addEventListener("click", onSubmit);
   }
 
   Office.onReady(() => {
-    if (document.readyState === "complete" || document.readyState === "interactive") {
-      wireEvents();
-    } else {
-      document.addEventListener("DOMContentLoaded", wireEvents);
-    }
+    if (document.readyState === "complete") wireEvents();
+    else document.addEventListener("DOMContentLoaded", wireEvents);
   });
-})();
 
+})();
