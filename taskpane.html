@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <title>S1P Support Ticket</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <script src="taskpane.js"></script>
+  <script src="/taskpane.js"></script>
 
   <style>
     body {
@@ -115,13 +115,13 @@
     <option value="">-- Select a category --</option>
   </select>
 
-  <!-- SUBCATEGORY (Software OR Issue) -->
+  <!-- SUBCATEGORY -->
   <label id="subcategory-label" class="hidden" for="subcategory">Subcategory:</label>
   <select id="subcategory" class="hidden">
     <option value="">-- Select a subcategory --</option>
   </select>
 
-  <!-- SUB-SUBCATEGORY (Issue type for PMS/Imaging) -->
+  <!-- SUB-SUBCATEGORY -->
   <label id="subsubcategory-label" class="hidden" for="subsubcategory">Issue Type:</label>
   <select id="subsubcategory" class="hidden">
     <option value="">-- Select an issue type --</option>
@@ -131,7 +131,7 @@
   <label for="contactName">Contact Name (Required):</label>
   <input id="contactName" placeholder="Your name">
 
-  <!-- WORKSTATION (IT only) -->
+  <!-- WORKSTATION -->
   <div id="ws-section" class="hidden">
     <label for="workstation">Workstation Name (Required for IT):</label>
     <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
