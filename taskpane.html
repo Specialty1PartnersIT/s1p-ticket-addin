@@ -9,15 +9,28 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      padding: 18px;
+      background: #f3f3f3; /* Light neutral Fluent background */
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Card Container */
+    .card {
       background: #ffffff;
+      border: 1px solid #d0d0d0;
+      border-radius: 10px;
+      padding: 24px;
+      max-width: 100%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     h3 {
+      margin-top: 0;
       margin-bottom: 20px;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 600;
-      color: #333;
+      color: #1a1a1a;
+      text-align: center;
     }
 
     label {
@@ -25,17 +38,25 @@
       margin-top: 12px;
       display: block;
       color: #333;
+      font-size: 14px;
     }
 
     input, textarea, select, button {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-top: 4px;
       margin-bottom: 12px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 6px;
       box-sizing: border-box;
       font-size: 14px;
+      background: #fafafa;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #0a65c2;
+      outline: none;
+      background: #fff;
     }
 
     button {
@@ -43,10 +64,12 @@
       color: white;
       font-size: 15px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
-      padding: 10px;
+      padding: 12px;
       font-weight: 600;
+      transition: background 0.2s ease;
+      margin-top: 10px;
     }
 
     button:hover {
@@ -57,18 +80,18 @@
       display: none;
     }
 
-    /* Workstation hint enlarged */
+    /* Workstation hint */
     .inline-hint {
       font-size: 13px;
       color: #555;
-      margin-top: -8px;
-      display: block;
+      margin-top: -6px;
       margin-bottom: 10px;
+      display: block;
     }
 
-    /* Attachment notice */
+    /* Attachment reminder */
     .attachment-note {
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 14px;
       font-weight: 600;
       color: #0a65c2; /* Fluent blue */
@@ -79,66 +102,70 @@
 
 <body>
 
-  <h3>S1P Support Ticket</h3>
+  <div class="card">
 
-  <!-- DEPARTMENT -->
-  <label for="department">Department:</label>
-  <select id="department">
-    <option value="">-- Select a department --</option>
-    <option value="IT">IT</option>
-    <option value="CBO - Full Service">CBO - Full Service</option>
-    <option value="Payor Relations">Payor Relations</option>
-    <option value="RCM - Non Full Service">RCM - Non Full Service</option>
-  </select>
+    <h3>S1P Support Ticket</h3>
 
-  <!-- CATEGORY -->
-  <label for="category">Category:</label>
-  <select id="category">
-    <option value="">-- Select a category --</option>
-  </select>
+    <!-- DEPARTMENT -->
+    <label for="department">Department:</label>
+    <select id="department">
+      <option value="">-- Select a department --</option>
+      <option value="IT">IT</option>
+      <option value="CBO - Full Service">CBO - Full Service</option>
+      <option value="Payor Relations">Payor Relations</option>
+      <option value="RCM - Non Full Service">RCM - Non Full Service</option>
+    </select>
 
-  <!-- SUBCATEGORY -->
-  <label id="subcategory-label" for="subcategory" class="hidden">Subcategory:</label>
-  <select id="subcategory" class="hidden">
-    <option value="">-- Select a subcategory --</option>
-  </select>
+    <!-- CATEGORY -->
+    <label for="category">Category:</label>
+    <select id="category">
+      <option value="">-- Select a category --</option>
+    </select>
 
-  <!-- SYSTEM (PMS / Imaging) -->
-  <label id="system-label" for="system" class="hidden">System:</label>
-  <select id="system" class="hidden">
-    <option value="">-- Select a system --</option>
-  </select>
+    <!-- SUBCATEGORY -->
+    <label id="subcategory-label" for="subcategory" class="hidden">Subcategory:</label>
+    <select id="subcategory" class="hidden">
+      <option value="">-- Select a subcategory --</option>
+    </select>
 
-  <!-- CONTACT NAME -->
-  <label for="contactName">Contact Name (Required):</label>
-  <input id="contactName" placeholder="Your name">
+    <!-- SYSTEM -->
+    <label id="system-label" for="system" class="hidden">System:</label>
+    <select id="system" class="hidden">
+      <option value="">-- Select a system --</option>
+    </select>
 
-  <!-- WORKSTATION NAME (IT Only) -->
-  <label id="ws-label" for="workstation">Workstation Name (Required for IT):</label>
-  <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
-  <small id="ws-hint" class="inline-hint">
-    Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as <strong>Device name</strong>.
-  </small>
+    <!-- CONTACT NAME -->
+    <label for="contactName">Contact Name (Required):</label>
+    <input id="contactName" placeholder="Your name">
 
-  <!-- CALLBACK NUMBER -->
-  <label for="callback">Callback Number (Required):</label>
-  <input id="callback" placeholder="e.g. 555-123-4567">
+    <!-- WORKSTATION -->
+    <label id="ws-label" for="workstation">Workstation Name (Required for IT):</label>
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+    <small id="ws-hint" class="inline-hint">
+      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as <strong>Device name</strong>.
+    </small>
 
-  <!-- LOCATION CODE -->
-  <label for="location">Location Code:</label>
-  <input id="location" placeholder="e.g. END073, PO0806, OS0204">
+    <!-- CALLBACK NUMBER -->
+    <label for="callback">Callback Number (Required):</label>
+    <input id="callback" placeholder="e.g. 555-123-4567">
 
-  <!-- DESCRIPTION -->
-  <label for="description">Description:</label>
-  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
+    <!-- LOCATION CODE -->
+    <label for="location">Location Code:</label>
+    <input id="location" placeholder="e.g. END073, PO0806, OS0204">
 
-  <!-- SUBMIT BUTTON -->
-  <button id="submitBtn">Submit Ticket</button>
+    <!-- DESCRIPTION -->
+    <label for="description">Description:</label>
+    <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
 
-  <!-- ATTACHMENT REMINDER -->
-  <p class="attachment-note">
-    After submitting, you’ll be able to attach screenshots or files in the next screen.
-  </p>
+    <!-- SUBMIT -->
+    <button id="submitBtn">Submit Ticket</button>
+
+    <!-- ATTACHMENT MESSAGE -->
+    <p class="attachment-note">
+      After submitting, you’ll be able to attach screenshots or files in the next screen.
+    </p>
+
+  </div>
 
 </body>
 </html>
