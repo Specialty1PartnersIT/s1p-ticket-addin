@@ -29,4 +29,5 @@ jobs:
           # are in the repo root
           app_location: "/"
           api_location: ""
-          output_location: "/"
+          output_location: ""
+
