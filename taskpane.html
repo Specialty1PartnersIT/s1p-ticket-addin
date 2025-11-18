@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>S1P Support Ticket</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <script src="taskpane.js"></script>
-
 
   <style>
     body {
@@ -20,7 +18,7 @@
       border: 1px solid #d0d0d0;
       border-radius: 10px;
       padding: 24px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     h3 {
@@ -116,13 +114,13 @@
     <option value="">-- Select a category --</option>
   </select>
 
-  <!-- SUBCATEGORY -->
+  <!-- SUBCATEGORY (software OR single-level IT subcategory) -->
   <label id="subcategory-label" class="hidden" for="subcategory">Subcategory:</label>
   <select id="subcategory" class="hidden">
     <option value="">-- Select a subcategory --</option>
   </select>
 
-  <!-- SUB-SUBCATEGORY -->
+  <!-- SUB-SUBCATEGORY (issue type for PMS / Imaging) -->
   <label id="subsubcategory-label" class="hidden" for="subsubcategory">Issue Type:</label>
   <select id="subsubcategory" class="hidden">
     <option value="">-- Select an issue type --</option>
@@ -130,12 +128,12 @@
 
   <!-- CONTACT NAME -->
   <label for="contactName">Contact Name (Required):</label>
-  <input id="contactName" placeholder="Your name">
+  <input id="contactName" placeholder="Your name" />
 
-  <!-- WORKSTATION -->
+  <!-- WORKSTATION (IT only) -->
   <div id="ws-section" class="hidden">
     <label for="workstation">Workstation Name (Required for IT):</label>
-    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05" />
     <small class="inline-hint">
       Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the device name.
     </small>
@@ -143,11 +141,11 @@
 
   <!-- CALLBACK -->
   <label for="callback">Callback Number (Required):</label>
-  <input id="callback" placeholder="e.g. 555-123-4567">
+  <input id="callback" placeholder="e.g. 555-123-4567" />
 
   <!-- LOCATION -->
   <label for="location">Location Code:</label>
-  <input id="location" placeholder="e.g. END073, PO0806, OS0609">
+  <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
 
   <!-- DESCRIPTION -->
   <label for="description">Description:</label>
@@ -162,6 +160,8 @@
 
 </div>
 
+<!-- IMPORTANT: load our JS after the DOM so getElementById works -->
+<script src="taskpane.js"></script>
+
 </body>
 </html>
-
