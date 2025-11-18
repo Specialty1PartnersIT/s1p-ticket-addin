@@ -321,19 +321,44 @@ function submitTicket() {
   const sub = document.getElementById("subcategory").value;
   const subsub = document.getElementById("subsubcategory").value;
   const loc = document.getElementById("location").value;
+  const contact = document.getElementById("contactName").value;
+  const callback = document.getElementById("callback").value;
+  const workstation = document.getElementById("workstation")?.value || "";
+  const desc = document.getElementById("description").value;
 
   const detail = [sub, subsub].filter(v => v).join(" – ");
 
+  // Subject
   let subject = `Ticket – ${dept}: ${cat}`;
   if (detail) subject += ` – ${detail}`;
   if (loc) subject += ` – (${loc})`;
 
+  // BODY TEMPLATE (HTML for better formatting)
+  let body = `
+<b>Contact Name:</b> ${contact}<br>
+<b>Callback Number:</b> ${callback}<br>
+${dept === "IT" ? `<b>Workstation:</b> ${workstation}<br>` : ""}
+<b>Location:</b> ${loc}<br>
+<b>Department:</b> ${dept}<br>
+<b>Category:</b> ${cat}<br>
+${sub ? `<b>Subcategory:</b> ${sub}<br>` : ""}
+${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
+<br>
+<b>Description:</b><br>
+${desc.replace(/\n/g, "<br>")}
+  `;
+
+  // Who does it go to?
   const email = DEPARTMENT_EMAIL_MAP[dept];
 
+  // 🚀 OPEN EMAIL WITH TO, SUBJECT, AND BODY INSERTED
   Office.context.mailbox.displayNewMessageForm({
     toRecipients: [email],
-    subject: subject
+    subject: subject,
+    htmlBody: body
   });
 
+  // Close taskpane in OWA
   try { Office.context.ui.messageParent("close"); } catch {}
 }
+
