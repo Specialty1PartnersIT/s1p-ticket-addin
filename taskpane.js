@@ -1,4 +1,6 @@
-// Auto-fill Contact Name from Outlook + save locally
+// ----------------------------------------------------
+// Auto-fill Contact Name from Outlook + local fallback
+// ----------------------------------------------------
 Office.onReady(() => {
   try {
     const profile = Office.context.mailbox.userProfile;
@@ -7,20 +9,18 @@ Office.onReady(() => {
       localStorage.setItem("lastContactName", profile.displayName);
     }
   } catch (e) {
-    console.log("Could not load profile name:", e);
+    console.log("Could not load Outlook profile name:", e);
   }
 
-  // Load last saved name (fallback)
-  const savedName = localStorage.getItem("lastContactName");
-  if (savedName) {
-    document.getElementById("contactName").value = savedName;
+  const saved = localStorage.getItem("lastContactName");
+  if (saved) {
+    document.getElementById("contactName").value = saved;
   }
 });
 
-/* ------------------------------------------------
-   CATEGORY + SUBCATEGORY + SYSTEM MAPS
---------------------------------------------------*/
-
+// ----------------------------------------------------
+// CATEGORY MAP (per Department)
+// ----------------------------------------------------
 const CATEGORY_MAP = {
   "IT": [
     "PMS / Practice Management System",
@@ -94,27 +94,10 @@ const CATEGORY_MAP = {
   ]
 };
 
-const SUBCATEGORY_MAP = {
-  "PMS / Practice Management System": [
-    "EagleSoft",
-    "EndoVision/Clinivision/OMSVision",
-    "WinOMS",
-    "TDO",
-    "WinDent",
-    "Dentrix",
-    "PBS Endo",
-    "DSN",
-    "Denticon",
-    "Other (PMS)"
-  ],
-
-  "Imaging Software": [
-    "CRD Dicom",
-    "Romexis",
-    "EZ3D-i",
-    "Other (Imaging)"
-  ],
-
+// ----------------------------------------------------
+// IT ISSUE SUBCATEGORIES (All IT categories EXCEPT PMS/Imaging)
+// ----------------------------------------------------
+const IT_SUBCATEGORY_MAP = {
   "Email/Outlook": [
     "Cannot send",
     "Cannot receive",
@@ -179,48 +162,95 @@ const SUBCATEGORY_MAP = {
     "Data Integrity",
     "New Reports",
     "Report Edits"
-  ]
-};
-
-const SYSTEM_MAP = {
-  "PMS / Practice Management System": [
-    "EagleSoft", "Dentrix", "DSN", "TDO", "PBS Endo",
-    "WinOMS", "WinDent", "Clinivision", "Endovision", "Other PMS"
   ],
-  "Imaging Software": [
-    "Romexis", "CRD Dicom", "EZ3D-i", "Dexis", "Other Imaging"
+
+  "Other": [
+    "General / Not specified"
   ]
 };
 
-/* ------------------------------------------------
-   DEPARTMENT CHANGE HANDLER
---------------------------------------------------*/
+// ----------------------------------------------------
+// PMS / IMAGING SOFTWARE LIST (subcategory #1)
+// ----------------------------------------------------
+const IT_SOFTWARE_MAP = {
+  "PMS / Practice Management System": [
+    "EagleSoft",
+    "EndoVision",
+    "Clinivision",
+    "OMSVision",
+    "WinOMS",
+    "TDO",
+    "WinDent",
+    "Dentrix",
+    "PBS Endo",
+    "DSN",
+    "Denticon",
+    "Other PMS"
+  ],
 
+  "Imaging Software": [
+    "CRD Dicom",
+    "Romexis",
+    "EZ3D-i",
+    "Dexis",
+    "Sidexis",
+    "Carestream",
+    "XDR",
+    "Vatech",
+    "Other Imaging"
+  ]
+};
+
+// ----------------------------------------------------
+// PMS / IMAGING ISSUE TYPES (sub-subcategory #2)
+// ----------------------------------------------------
+const IT_ISSUE_TYPE_MAP = {
+  "PMS / Practice Management System": [
+    "Access / Permissions",
+    "Installation / Upgrade",
+    "Performance / Slowness",
+    "Data / Charting Issue",
+    "Integration with other systems",
+    "Other (PMS Issue)"
+  ],
+
+  "Imaging Software": [
+    "Image acquisition / capture",
+    "Viewer / workstation issue",
+    "Integration with PMS",
+    "Export / sharing issue",
+    "Other (Imaging Issue)"
+  ]
+};
+
+// ----------------------------------------------------
+// DEPARTMENT CHANGE HANDLER
+// ----------------------------------------------------
 document.getElementById("department").addEventListener("change", function () {
   const dept = this.value;
 
   const category = document.getElementById("category");
   const subcat = document.getElementById("subcategory");
+  const subsub = document.getElementById("subsubcategory");
   const subcatLabel = document.getElementById("subcategory-label");
-  const system = document.getElementById("system");
-  const systemLabel = document.getElementById("system-label");
+  const subsubLabel = document.getElementById("subsubcategory-label");
   const wsSection = document.getElementById("ws-section");
 
-  // Reset all dropdowns
+  // Reset UI
   category.innerHTML = `<option value="">-- Select a category --</option>`;
   subcat.classList.add("hidden");
+  subsub.classList.add("hidden");
   subcatLabel.classList.add("hidden");
-  system.classList.add("hidden");
-  systemLabel.classList.add("hidden");
+  subsubLabel.classList.add("hidden");
 
-  // Populate categories
+  // Fill categories
   if (CATEGORY_MAP[dept]) {
     CATEGORY_MAP[dept].forEach(c => {
       category.innerHTML += `<option value="${c}">${c}</option>`;
     });
   }
 
-  // Show/hide workstation field
+  // Workstation field only for IT
   if (dept === "IT") {
     wsSection.classList.remove("hidden");
   } else {
@@ -228,77 +258,100 @@ document.getElementById("department").addEventListener("change", function () {
   }
 });
 
-/* ------------------------------------------------
-   CATEGORY CHANGE HANDLER
---------------------------------------------------*/
-
+// ----------------------------------------------------
+// CATEGORY CHANGE HANDLER
+// ----------------------------------------------------
 document.getElementById("category").addEventListener("change", function () {
   const cat = this.value;
+  const dept = document.getElementById("department").value;
 
   const subcat = document.getElementById("subcategory");
+  const subsub = document.getElementById("subsubcategory");
   const subcatLabel = document.getElementById("subcategory-label");
-  const system = document.getElementById("system");
-  const systemLabel = document.getElementById("system-label");
+  const subsubLabel = document.getElementById("subsubcategory-label");
 
-  // Reset visibility
+  // Reset UI
   subcat.classList.add("hidden");
+  subsub.classList.add("hidden");
   subcatLabel.classList.add("hidden");
-  system.classList.add("hidden");
-  systemLabel.classList.add("hidden");
+  subsubLabel.classList.add("hidden");
 
-  // Reset dropdown content
   subcat.innerHTML = `<option value="">-- Select a subcategory --</option>`;
-  system.innerHTML = `<option value="">-- Select a system --</option>`;
+  subsub.innerHTML = `<option value="">-- Select issue type --</option>`;
 
-  // Subcategories?
-  if (SUBCATEGORY_MAP[cat]) {
+  // PMS / IMAGING → Two-level dropdown
+  if (dept === "IT" && IT_SOFTWARE_MAP[cat]) {
     subcat.classList.remove("hidden");
     subcatLabel.classList.remove("hidden");
-    SUBCATEGORY_MAP[cat].forEach(s => {
+
+    IT_SOFTWARE_MAP[cat].forEach(s => {
       subcat.innerHTML += `<option value="${s}">${s}</option>`;
     });
+
+    return;
   }
 
-  // Systems?
-  if (SYSTEM_MAP[cat]) {
-    system.classList.remove("hidden");
-    systemLabel.classList.remove("hidden");
-    SYSTEM_MAP[cat].forEach(s => {
-      system.innerHTML += `<option value="${s}">${s}</option>`;
+  // Other IT categories → One-level dropdown
+  if (dept === "IT" && IT_SUBCATEGORY_MAP[cat]) {
+    subcat.classList.remove("hidden");
+    subcatLabel.classList.remove("hidden");
+
+    IT_SUBCATEGORY_MAP[cat].forEach(s => {
+      subcat.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+    return;
+  }
+
+  // All other departments → No subcategories
+});
+
+// ----------------------------------------------------
+// SUBCATEGORY CHANGE HANDLER (for PMS/Imaging only)
+// ----------------------------------------------------
+document.getElementById("subcategory").addEventListener("change", function () {
+  const subcat = this.value;
+  const cat = document.getElementById("category").value;
+  const dept = document.getElementById("department").value;
+
+  const subsub = document.getElementById("subsubcategory");
+  const subsubLabel = document.getElementById("subsubcategory-label");
+
+  subsub.classList.add("hidden");
+  subsubLabel.classList.add("hidden");
+
+  subsub.innerHTML = `<option value="">-- Select issue type --</option>`;
+
+  // Only PMS/Imaging use sub-subcategories
+  if (dept === "IT" && IT_ISSUE_TYPE_MAP[cat]) {
+    subsub.classList.remove("hidden");
+    subsubLabel.classList.remove("hidden");
+
+    IT_ISSUE_TYPE_MAP[cat].forEach(i => {
+      subsub.innerHTML += `<option value="${i}">${i}</option>`;
     });
   }
 });
 
-/* ------------------------------------------------
-   SUBMIT TICKET — BUILD SUBJECT + CLOSE PANE
---------------------------------------------------*/
-
+// ----------------------------------------------------
+// SUBMIT BUTTON — SUBJECT BUILDER + CLOSE
+// ----------------------------------------------------
 document.getElementById("submitBtn").addEventListener("click", function () {
+
   const dept = document.getElementById("department").value;
   const category = document.getElementById("category").value;
   const subcat = document.getElementById("subcategory").value;
-  const system = document.getElementById("system").value;
+  const subsub = document.getElementById("subsubcategory").value;
   const location = document.getElementById("location").value;
 
   let detail = "";
 
-  if (system) {
-    detail = system;
-  } else if (subcat) {
-    detail = subcat;
-  }
+  if (subsub) detail = subsub;
+  else if (subcat) detail = subcat;
 
-  // Build subject
   let subject = `Ticket – ${dept}: ${category}`;
   if (detail) subject += ` – ${detail}`;
   if (location) subject += ` – (${location})`;
 
-  // Apply subject to email
   Office.context.mailbox.item.subject.setAsync(subject);
-
-  // Close the taskpane
   Office.context.ui.closeContainer();
-
-  // Actual ticketing logic handled in back-end (email, system, etc.)
 });
-
