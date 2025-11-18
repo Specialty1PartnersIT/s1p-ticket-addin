@@ -1,4 +1,4 @@
-// Auto-fill Contact Name from Outlook
+// Auto-fill Contact Name from Outlook + save locally
 Office.onReady(() => {
   try {
     const profile = Office.context.mailbox.userProfile;
@@ -10,15 +10,17 @@ Office.onReady(() => {
     console.log("Could not load profile name:", e);
   }
 
+  // Load last saved name (fallback)
   const savedName = localStorage.getItem("lastContactName");
   if (savedName) {
     document.getElementById("contactName").value = savedName;
   }
 });
 
-// ------------------------------
-// CATEGORY + SUBCATEGORY MAPS
-// ------------------------------
+/* ------------------------------------------------
+   CATEGORY + SUBCATEGORY + SYSTEM MAPS
+--------------------------------------------------*/
+
 const CATEGORY_MAP = {
   "IT": [
     "PMS / Practice Management System",
@@ -190,9 +192,10 @@ const SYSTEM_MAP = {
   ]
 };
 
-// ------------------------------
-// Department Change
-// ------------------------------
+/* ------------------------------------------------
+   DEPARTMENT CHANGE HANDLER
+--------------------------------------------------*/
+
 document.getElementById("department").addEventListener("change", function () {
   const dept = this.value;
 
@@ -203,18 +206,21 @@ document.getElementById("department").addEventListener("change", function () {
   const systemLabel = document.getElementById("system-label");
   const wsSection = document.getElementById("ws-section");
 
+  // Reset all dropdowns
   category.innerHTML = `<option value="">-- Select a category --</option>`;
   subcat.classList.add("hidden");
   subcatLabel.classList.add("hidden");
   system.classList.add("hidden");
   systemLabel.classList.add("hidden");
 
+  // Populate categories
   if (CATEGORY_MAP[dept]) {
     CATEGORY_MAP[dept].forEach(c => {
       category.innerHTML += `<option value="${c}">${c}</option>`;
     });
   }
 
+  // Show/hide workstation field
   if (dept === "IT") {
     wsSection.classList.remove("hidden");
   } else {
@@ -222,22 +228,29 @@ document.getElementById("department").addEventListener("change", function () {
   }
 });
 
-// ------------------------------
-// Category Change
-// ------------------------------
+/* ------------------------------------------------
+   CATEGORY CHANGE HANDLER
+--------------------------------------------------*/
+
 document.getElementById("category").addEventListener("change", function () {
   const cat = this.value;
+
   const subcat = document.getElementById("subcategory");
   const subcatLabel = document.getElementById("subcategory-label");
   const system = document.getElementById("system");
   const systemLabel = document.getElementById("system-label");
 
-  subcat.innerHTML = `<option value="">-- Select a subcategory --</option>`;
+  // Reset visibility
   subcat.classList.add("hidden");
   subcatLabel.classList.add("hidden");
   system.classList.add("hidden");
   systemLabel.classList.add("hidden");
 
+  // Reset dropdown content
+  subcat.innerHTML = `<option value="">-- Select a subcategory --</option>`;
+  system.innerHTML = `<option value="">-- Select a system --</option>`;
+
+  // Subcategories?
   if (SUBCATEGORY_MAP[cat]) {
     subcat.classList.remove("hidden");
     subcatLabel.classList.remove("hidden");
@@ -246,6 +259,7 @@ document.getElementById("category").addEventListener("change", function () {
     });
   }
 
+  // Systems?
   if (SYSTEM_MAP[cat]) {
     system.classList.remove("hidden");
     systemLabel.classList.remove("hidden");
@@ -255,11 +269,11 @@ document.getElementById("category").addEventListener("change", function () {
   }
 });
 
-// ------------------------------
-// Submit Ticket – Build subject + close pane
-// ------------------------------
-document.getElementById("submitBtn").addEventListener("click", function () {
+/* ------------------------------------------------
+   SUBMIT TICKET — BUILD SUBJECT + CLOSE PANE
+--------------------------------------------------*/
 
+document.getElementById("submitBtn").addEventListener("click", function () {
   const dept = document.getElementById("department").value;
   const category = document.getElementById("category").value;
   const subcat = document.getElementById("subcategory").value;
@@ -274,5 +288,14 @@ document.getElementById("submitBtn").addEventListener("click", function () {
     detail = subcat;
   }
 
+  // Build subject
   let subject = `Ticket – ${dept}: ${category}`;
-  if (detail) subject += ` – ${detail}
+  if (detail) subject += ` – ${detail}`;
+  if (location) subject += ` – (${location})`;
+
+  // Apply subject to email
+  Office.context.mailbox.item.subject.setAsync(subject);
+
+  // Close the taskpane
+  Office.context.ui.closeContainer();
+});
