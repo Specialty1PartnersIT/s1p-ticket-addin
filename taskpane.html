@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <title>S1P Support Ticket</title>
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="taskpane.js"></script>
 
   <style>
     body {
@@ -66,7 +67,6 @@
       padding: 12px;
       font-weight: 600;
       margin-top: 10px;
-      transition: background 0.2s ease;
     }
 
     button:hover {
@@ -76,11 +76,11 @@
     .hidden { display: none; }
 
     .inline-hint {
-      font-size: 13px;
-      color: #555;
+      font-size: 14px;
+      color: #444;
       margin-top: -6px;
       margin-bottom: 10px;
-      display: block;
+      font-weight: 600;
     }
 
     .attachment-note {
@@ -95,74 +95,71 @@
 
 <body>
 
-  <div class="card">
+<div class="card">
 
-    <h3>S1P Support Ticket</h3>
+  <h3>S1P Support Ticket</h3>
 
-    <!-- SUPPORT DEPARTMENT -->
-    <label for="department">Support Department:</label>
-    <select id="department">
-      <option value="">-- Select a support department --</option>
-      <option value="IT">IT</option>
-      <option value="CBO - Full Service">CBO - Full Service</option>
-      <option value="Payor Relations">Payor Relations</option>
-      <option value="RCM - Non Full Service">RCM - Non Full Service</option>
-    </select>
+  <!-- DEPARTMENT -->
+  <label for="department">Support Department:</label>
+  <select id="department">
+    <option value="">-- Select a support department --</option>
+    <option value="IT">IT</option>
+    <option value="CBO - Full Service">CBO - Full Service</option>
+    <option value="Payor Relations">Payor Relations</option>
+    <option value="RCM - Non Full Service">RCM - Non Full Service</option>
+  </select>
 
-    <!-- CATEGORY -->
-    <label for="category">Category:</label>
-    <select id="category">
-      <option value="">-- Select a category --</option>
-    </select>
+  <!-- CATEGORY -->
+  <label for="category">Category:</label>
+  <select id="category">
+    <option value="">-- Select a category --</option>
+  </select>
 
-    <!-- SUBCATEGORY -->
-    <label id="subcategory-label" for="subcategory" class="hidden">Subcategory:</label>
-    <select id="subcategory" class="hidden">
-      <option value="">-- Select a subcategory --</option>
-    </select>
+  <!-- SUBCATEGORY (Software OR Issue) -->
+  <label id="subcategory-label" class="hidden" for="subcategory">Subcategory:</label>
+  <select id="subcategory" class="hidden">
+    <option value="">-- Select a subcategory --</option>
+  </select>
 
-    <!-- SYSTEM -->
-    <label id="system-label" for="system" class="hidden">System:</label>
-    <select id="system" class="hidden">
-      <option value="">-- Select a system --</option>
-    </select>
+  <!-- SUB-SUBCATEGORY (Issue type for PMS/Imaging) -->
+  <label id="subsubcategory-label" class="hidden" for="subsubcategory">Issue Type:</label>
+  <select id="subsubcategory" class="hidden">
+    <option value="">-- Select an issue type --</option>
+  </select>
 
-    <!-- CONTACT NAME -->
-    <label for="contactName">Contact Name (Required):</label>
-    <input id="contactName" placeholder="Your name">
+  <!-- CONTACT NAME -->
+  <label for="contactName">Contact Name (Required):</label>
+  <input id="contactName" placeholder="Your name">
 
-    <!-- WORKSTATION -->
-    <div id="ws-section" class="hidden">
-      <label id="ws-label" for="workstation">Workstation Name (Required for IT):</label>
-      <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
-      <small id="ws-hint" class="inline-hint">
-        Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the <strong>Device name</strong>.
-      </small>
-    </div>
-
-    <!-- CALLBACK NUMBER -->
-    <label for="callback">Callback Number (Required):</label>
-    <input id="callback" placeholder="e.g. 555-123-4567">
-
-    <!-- LOCATION CODE -->
-    <label for="location">Location Code:</label>
-    <input id="location" placeholder="e.g. END073, PO0806, OS0609">
-
-    <!-- DESCRIPTION -->
-    <label for="description">Description:</label>
-    <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
-
-    <!-- SUBMIT -->
-    <button id="submitBtn">Submit Ticket</button>
-
-    <p class="attachment-note">
-      After submitting, you’ll be able to attach screenshots or files in the next screen.
-    </p>
-
+  <!-- WORKSTATION (IT only) -->
+  <div id="ws-section" class="hidden">
+    <label for="workstation">Workstation Name (Required for IT):</label>
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+    <small class="inline-hint">
+      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the device name.
+    </small>
   </div>
 
-  <!-- IMPORTANT: JS LOADED LAST -->
-  <script src="taskpane.js"></script>
+  <!-- CALLBACK -->
+  <label for="callback">Callback Number (Required):</label>
+  <input id="callback" placeholder="e.g. 555-123-4567">
+
+  <!-- LOCATION -->
+  <label for="location">Location Code:</label>
+  <input id="location" placeholder="e.g. END073, PO0806, OS0609">
+
+  <!-- DESCRIPTION -->
+  <label for="description">Description:</label>
+  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
+
+  <!-- SUBMIT -->
+  <button id="submitBtn">Submit Ticket</button>
+
+  <p class="attachment-note">
+    After submitting, you’ll be able to attach screenshots or files in the next screen.
+  </p>
+
+</div>
 
 </body>
 </html>
