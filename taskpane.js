@@ -298,4 +298,7 @@ document.getElementById("submitBtn").addEventListener("click", function () {
 
   // Close the taskpane
   Office.context.ui.closeContainer();
+
+  // Actual ticketing logic handled in back-end (email, system, etc.)
 });
+
