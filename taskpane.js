@@ -238,7 +238,6 @@ function initForm() {
   deptSelect.addEventListener("change", () => {
     const dept = deptSelect.value;
 
-    // Reset category + sub levels
     clearSelect(categorySelect, "-- Select a category --");
     clearSelect(subSelect, "-- Select a subcategory --");
     clearSelect(subSubSelect, "-- Select an issue type --");
@@ -248,12 +247,10 @@ function initForm() {
     showElement(subSubSelect, false);
     showElement(subSubLabel, false);
 
-    // Populate categories for chosen dept
     if (CATEGORY_MAP[dept]) {
       fillSelect(categorySelect, CATEGORY_MAP[dept]);
     }
 
-    // Workstation section only for IT
     showElement(wsSection, dept === "IT");
   });
 
@@ -271,38 +268,28 @@ function initForm() {
     showElement(subSubLabel, false);
 
     if (dept === "IT") {
-      // Special 3-level flow for PMS/Imaging
+      // PMS / Imaging special logic (software + issue type)
       if (cat === "PMS / Practice Management System" || cat === "Imaging Software") {
-        const softwareList = IT_SOFTWARE_MAP[cat] || [];
-        const issueList = IT_ISSUE_TYPE_MAP[cat] || [];
+        fillSelect(subSelect, IT_SOFTWARE_MAP[cat]);
+        fillSelect(subSubSelect, IT_ISSUE_TYPE_MAP[cat]);
 
-        if (softwareList.length) {
-          fillSelect(subSelect, softwareList);
-          showElement(subSelect, true);
-          showElement(subLabel, true);
-        }
-
-        if (issueList.length) {
-          fillSelect(subSubSelect, issueList);
-          showElement(subSubSelect, true);
-          showElement(subSubLabel, true);
-        }
-      } else {
-        // All other IT categories – single subcategory level
-        const subList = IT_OTHER_SUBCATEGORY_MAP[cat];
-        if (subList && subList.length) {
-          fillSelect(subSelect, subList);
-          showElement(subSelect, true);
-          showElement(subLabel, true);
-        }
+        showElement(subSelect, true);
+        showElement(subLabel, true);
+        showElement(subSubSelect, true);
+        showElement(subSubLabel, true);
+        return;
       }
-    } else {
-      // Non-IT departments – no subcategories
-      // (leave both hidden)
+
+      // Other IT categories – one-level list
+      const list = IT_OTHER_SUBCATEGORY_MAP[cat];
+      if (list) {
+        fillSelect(subSelect, list);
+        showElement(subSelect, true);
+        showElement(subLabel, true);
+      }
     }
   });
 
-  // Submit
   submitBtn.addEventListener("click", onSubmitClick);
 }
 
@@ -313,84 +300,97 @@ function initForm() {
 function setSubjectSafe(subjectText) {
   try {
     if (
-      typeof Office === "undefined" ||
-      !Office.context ||
-      !Office.context.mailbox ||
-      !Office.context.mailbox.item
+      typeof Office !== "undefined" &&
+      Office.context?.mailbox?.item?.subject &&
+      typeof Office.context.mailbox.item.subject.setAsync === "function"
     ) {
-      return;
-    }
-
-    const item = Office.context.mailbox.item;
-    const subj = item.subject;
-
-    // Compose mode: subject is an object with setAsync
-    if (subj && typeof subj.setAsync === "function") {
-      subj.setAsync(subjectText, { asyncContext: null }, result => {
-        if (result && result.status !== Office.AsyncResultStatus.Succeeded) {
-          console.log("Subject setAsync failed:", result.error);
-        }
-      });
-    } else if (Office.context.mailbox.displayNewMessageForm) {
-      // Read mode – open a new message with the subject instead
-      Office.context.mailbox.displayNewMessageForm({ subject: subjectText });
-    } else {
-      console.log("Subject is not writeable in this context.");
+      Office.context.mailbox.item.subject.setAsync(subjectText);
     }
   } catch (e) {
-    console.log("Failed to set subject via Office.js:", e);
+    console.log("Subject set failed:", e);
   }
 }
 
 function closeTaskpaneSafe() {
   try {
-    if (typeof Office !== "undefined" && Office.context && Office.context.ui && Office.context.ui.closeContainer) {
-      Office.context.ui.closeContainer();
-    }
-  } catch (e) {
-    console.log("Failed to close taskpane:", e);
-  }
+    Office.context?.ui?.closeContainer();
+  } catch (e) {}
 }
 
 /* ------------------------------------------------
-   SUBMIT HANDLER
+   UPDATED SUBMIT HANDLER  (FULL BODY + SUBJECT)
 --------------------------------------------------*/
 
 function onSubmitClick() {
-  const deptSelect = document.getElementById("department");
-  const categorySelect = document.getElementById("category");
-  const subSelect = document.getElementById("subcategory");
-  const subSubSelect = document.getElementById("subsubcategory");
-  const locationInput = document.getElementById("location");
+  const dept = document.getElementById("department")?.value || "";
+  const category = document.getElementById("category")?.value || "";
+  const sub = document.getElementById("subcategory")?.value || "";
+  const subsub = document.getElementById("subsubcategory")?.value || "";
+  const contact = document.getElementById("contactName")?.value || "";
+  const callback = document.getElementById("callback")?.value || "";
+  const workstation = document.getElementById("workstation")?.value || "";
+  const location = document.getElementById("location")?.value || "";
+  const description = document.getElementById("description")?.value || "";
 
-  const dept = deptSelect ? deptSelect.value : "";
-  const category = categorySelect ? categorySelect.value : "";
-  const locationCode = locationInput ? locationInput.value : "";
-
+  /* BUILD SUBJECT */
   let detailParts = [];
 
   if (dept === "IT") {
-    const softwareOrSub = subSelect ? subSelect.value : "";
-    const issueType = subSubSelect ? subSubSelect.value : "";
-
-    if (softwareOrSub) detailParts.push(softwareOrSub);
-    if (issueType) detailParts.push(issueType);
+    if (sub) detailParts.push(sub);
+    if (subsub) detailParts.push(subsub);
   } else {
-    // For non-IT we *currently* don’t use subcategories, but we could later
-    const maybeSub = subSelect ? subSelect.value : "";
-    if (maybeSub) detailParts.push(maybeSub);
+    if (sub) detailParts.push(sub);
   }
 
-  let subject = `Ticket – ${dept || "Dept"}: ${category || "Category"}`;
-  if (detailParts.length) {
-    subject += " – " + detailParts.join(" – ");
-  }
-  if (locationCode) {
-    subject += ` – (${locationCode})`;
-  }
+  let subject = `Ticket – ${dept}: ${category}`;
+  if (detailParts.length) subject += ` – ${detailParts.join(" – ")}`;
+  if (location) subject += ` – (${location})`;
 
   setSubjectSafe(subject);
-  closeTaskpaneSafe();
+
+  /* BUILD BODY */
+  let body = `
+S1P Support Ticket
+
+Department: ${dept}
+Category: ${category}
+${sub ? `Subcategory: ${sub}` : ""}
+${subsub ? `Issue Type: ${subsub}` : ""}
+
+Contact Name: ${contact}
+Callback Number: ${callback}
+${dept === "IT" ? `Workstation: ${workstation}\n` : ""}
+Location Code: ${location}
+
+Description:
+${description}
+
+------------------------------
+(This ticket was generated using the S1P Outlook Add-in)
+`;
+
+  /* INSERT BODY */
+  try {
+    const item = Office.context?.mailbox?.item;
+
+    if (item?.body && typeof item.body.setAsync === "function") {
+      item.body.setAsync(body, { coercionType: Office.CoercionType.Text }, () => {
+        closeTaskpaneSafe();
+      });
+    } else if (Office.context.mailbox.displayNewMessageForm) {
+      Office.context.mailbox.displayNewMessageForm({
+        subject,
+        body
+      });
+      closeTaskpaneSafe();
+    } else {
+      console.log("Could not set body (no compose mode).");
+      closeTaskpaneSafe();
+    }
+  } catch (e) {
+    console.log("Body insertion failed:", e);
+    closeTaskpaneSafe();
+  }
 }
 
 /* ------------------------------------------------
@@ -405,17 +405,15 @@ if (typeof Office !== "undefined" && Office.onReady) {
       const profile = Office.context.mailbox.userProfile;
       const nameBox = document.getElementById("contactName");
 
-      if (profile && profile.displayName && nameBox) {
+      if (profile?.displayName && nameBox) {
         nameBox.value = profile.displayName;
         localStorage.setItem("lastContactName", profile.displayName);
       }
 
       const saved = localStorage.getItem("lastContactName");
-      if (saved && nameBox) {
-        nameBox.value = saved;
-      }
+      if (saved && nameBox) nameBox.value = saved;
     } catch (e) {
-      console.log("Could not load profile name:", e);
+      console.log("Profile load error:", e);
     }
   });
 }
