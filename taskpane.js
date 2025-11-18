@@ -1,150 +1,43 @@
-/* global Office */
+// Auto-fill Contact Name from Outlook
+Office.onReady(() => {
+  try {
+    const profile = Office.context.mailbox.userProfile;
+    if (profile && profile.displayName) {
+      document.getElementById("contactName").value = profile.displayName;
 
-(() => {
-
-  function byId(id) {
-    return document.getElementById(id);
+      // Save to localStorage
+      localStorage.setItem("lastContactName", profile.displayName);
+    }
+  } catch (e) {
+    console.log("Could not load profile name:", e);
   }
 
-  function clearSelect(select, placeholderText) {
-    select.innerHTML = "";
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = placeholderText;
-    select.appendChild(opt);
+  // Load saved contact name if available
+  const savedName = localStorage.getItem("lastContactName");
+  if (savedName) {
+    document.getElementById("contactName").value = savedName;
   }
+});
 
-  function populateSelect(select, options) {
-    options.forEach(value => {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = value;
-      select.appendChild(opt);
-    });
-  }
+// ------------------------------
+// CATEGORY + SUBCATEGORY MAPS
+// ------------------------------
+const CATEGORY_MAP = {
+  "IT": [
+    "PMS / Practice Management System",
+    "Imaging Software",
+    "Email/Outlook",
+    "Teams",
+    "SharePoint",
+    "Hardware",
+    "Network/Internet",
+    "Security",
+    "RingCentral",
+    "Acumen",
+    "Other"
+  ],
 
-  // ---------------------------
-  // Department → Email mapping
-  // ---------------------------
-  const DEPARTMENT_EMAIL = {
-    "IT": "Support@specialty1partners.com",
-    "CBO - Full Service": "cbo@specialty1partners.com",
-    "Payor Relations": "payorrelations@specialty1partners.com",
-    "RCM - Non Full Service": "rcm@specialty1partners.com"
-  };
-
-  // -----------------------------------
-  // IT Categories → Subcategories
-  // -----------------------------------
-  const IT_SUBCATEGORY_MAP = {
-    "PMS / Practice Management System": [
-      "Access / Permissions",
-      "Installation / Upgrade",
-      "Performance / Slowness",
-      "Data / Charting Issue",
-      "Integration with other systems",
-      "Other (PMS Issue)"
-    ],
-    "Imaging Software": [
-      "Image acquisition / capture",
-      "Viewer / workstation issue",
-      "Integration with PMS",
-      "Export / sharing issue",
-      "Other (Imaging Issue)"
-    ],
-    "Email/Outlook": [
-      "Cannot send",
-      "Cannot receive",
-      "Sync issues",
-      "Calendar issue",
-      "Shared mailbox issue",
-      "Add-in issue",
-      "Other (Email)"
-    ],
-    "Teams": [
-      "Chat / Channels",
-      "Meetings / Calls",
-      "Screen sharing",
-      "Teams / Channels access",
-      "Notifications",
-      "Other (Teams)"
-    ],
-    "SharePoint": [
-      "Permissions / Access",
-      "File sync / OneDrive",
-      "Broken link",
-      "Page not loading",
-      "Version history / Restore",
-      "Other (SharePoint)"
-    ],
-    "Hardware": [
-      "Desktop / Laptop",
-      "Docking station",
-      "Monitor",
-      "Printer / Scanner",
-      "Phone / Headset",
-      "Other (Hardware)"
-    ],
-    "Network/Internet": [
-      "No connectivity",
-      "Slow network",
-      "VPN",
-      "Wi-Fi",
-      "Other (Network)"
-    ],
-    "RingCentral": [
-      "Phone hardware",
-      "Call quality",
-      "Fax send/receive",
-      "Text send/receive",
-      "Early office closure / schedule changes",
-      "Other (RingCentral)"
-    ],
-    "Security": [
-      "Breach",
-      "Incident",
-      "Non-Critical",
-      "Other (Security)"
-    ],
-    "Acumen": [
-      "Access / Permissions",
-      "Data integrity",
-      "New reports",
-      "Report edits",
-      "Other (Acumen)"
-    ],
-    "Other": [
-      "General / Not specified"
-    ]
-  };
-
-  // -----------------------------
-  // PMS / Imaging System Lists
-  // -----------------------------
-  const PMS_SYSTEMS = [
-    "EagleSoft",
-    "EndoVision/Clinivision/OMSVision",
-    "WinOMS",
-    "TDO",
-    "WinDent",
-    "Dentrix",
-    "PBS Endo",
-    "DSN",
-    "Denticon",
-    "Other (PMS)"
-  ];
-
-  const IMAGING_SYSTEMS = [
-    "CRD Dicom",
-    "Romexis",
-    "EZ3D-i",
-    "Other (Imaging)"
-  ];
-
-  // -------------------------
-  // CBO Categories
-  // -------------------------
-  const CBO_CATEGORIES = [
+  "CBO - Full Service": [
     "Adjustment Correction Needed",
     "Arestin Xray Request",
     "Authorization Review Request",
@@ -165,17 +58,14 @@
     "Payment Posting Request",
     "Secondary Claim Needed",
     "Other"
-  ];
+  ],
 
-  // -------------------------
-  // Payor Relations Categories
-  // -------------------------
-  const PAYOR_RELATIONS_CATEGORIES = [
+  "Payor Relations": [
     "Add Payor",
     "Claim Review",
     "Fee Review Request",
     "Fee Schedule discrepancy",
-    "Leasing Inquiries",
+    "Leasing Inquires",
     "Medical Request",
     "Meeting Request",
     "Miscellaneous",
@@ -189,213 +79,202 @@
     "Payor - Document Request",
     "Potential Participation",
     "Request Fee Schedule",
-    "Term Network",
+    "Term Networkedit",
     "Term Provider",
     "TIN Change",
     "Update Practice Data",
     "W-9 Request",
     "Other"
-  ];
+  ],
 
-  // -------------------------
-  // RCM Categories
-  // -------------------------
-  const RCM_CATEGORIES = [
+  "RCM - Non Full Service": [
     "Collection Placement",
     "RCM General questions",
     "Refund",
     "Other"
-  ];
+  ]
+};
 
-  // -------------------------
-  // Handle Department Change
-  // -------------------------
-  function onDepartmentChange() {
-    const dept = byId("department").value;
+// IT Subcategories
+const SUBCATEGORY_MAP = {
+  "PMS / Practice Management System": [
+    "EagleSoft",
+    "EndoVision/Clinivision/OMSVision",
+    "WinOMS",
+    "TDO",
+    "WinDent",
+    "Dentrix",
+    "PBS Endo",
+    "DSN",
+    "Denticon",
+    "Other (PMS)"
+  ],
 
-    const categorySelect = byId("category");
-    const subcategorySelect = byId("subcategory");
-    const systemSelect = byId("system");
+  "Imaging Software": [
+    "CRD Dicom",
+    "Romexis",
+    "EZ3D-i",
+    "Other (Imaging)"
+  ],
 
-    const subLabel = byId("subcategory-label");
-    const systemLabel = byId("system-label");
+  "Email/Outlook": [
+    "Cannot send",
+    "Cannot receive",
+    "Sync issues",
+    "Calendar issue",
+    "Shared mailbox issue",
+    "Add-in issue",
+    "Other (Email)"
+  ],
 
-    const wsLabel = byId("ws-label");
-    const wsInput = byId("workstation");
-    const wsHint = byId("ws-hint");
+  "Teams": [
+    "Chat/Channels",
+    "Meetings/Calls",
+    "Screen sharing",
+    "Teams/Channels access",
+    "Notifications",
+    "Other (Teams)"
+  ],
 
-    clearSelect(categorySelect, dept ? "-- Select a category --" : "-- Select a department first --");
-    clearSelect(subcategorySelect, "-- Select a category first --");
-    clearSelect(systemSelect, "-- Select a system --");
+  "SharePoint": [
+    "Permissions/Access",
+    "File sync/OneDrive",
+    "Broken link",
+    "Page not loading",
+    "Version history/Restore",
+    "Other (SharePoint)"
+  ],
 
-    subcategorySelect.classList.add("hidden");
-    subLabel.classList.add("hidden");
-    systemSelect.classList.add("hidden");
-    systemLabel.classList.add("hidden");
+  "Hardware": [
+    "Desktop/Laptop",
+    "Docking station",
+    "Monitor",
+    "Printer/Scanner",
+    "Phone/Headset",
+    "Other (Hardware)"
+  ],
 
-    // Workstation field visible only for IT
-    if (dept === "IT") {
-      wsLabel.classList.remove("hidden");
-      wsInput.classList.remove("hidden");
-      wsHint.classList.remove("hidden");
-    } else {
-      wsLabel.classList.add("hidden");
-      wsInput.classList.add("hidden");
-      wsHint.classList.add("hidden");
-    }
+  "Network/Internet": [
+    "No connectivity",
+    "Slow network",
+    "VPN",
+    "Wi-Fi",
+    "Other (Network)"
+  ],
 
-    if (!dept) return;
+  "Security": [
+    "Breach",
+    "Incident",
+    "Non-Critical"
+  ],
 
-    if (dept === "IT") {
-      populateSelect(categorySelect, Object.keys(IT_SUBCATEGORY_MAP));
-    } else if (dept === "CBO - Full Service") {
-      populateSelect(categorySelect, CBO_CATEGORIES);
-    } else if (dept === "Payor Relations") {
-      populateSelect(categorySelect, PAYOR_RELATIONS_CATEGORIES);
-    } else if (dept === "RCM - Non Full Service") {
-      populateSelect(categorySelect, RCM_CATEGORIES);
-    }
-  }
+  "RingCentral": [
+    "Phone hardware",
+    "Call quality",
+    "Fax send/receive",
+    "Text send/receive",
+    "Early office closure / schedule change"
+  ],
 
-  // -------------------------
-  // Handle Category Change
-  // -------------------------
-  function onCategoryChange() {
-    const dept = byId("department").value;
-    const category = byId("category").value;
+  "Acumen": [
+    "Access/Permissions",
+    "Data Integrity",
+    "New Reports",
+    "Report Edits"
+  ]
+};
 
-    const subcategorySelect = byId("subcategory");
-    const systemSelect = byId("system");
-    const subLabel = byId("subcategory-label");
-    const systemLabel = byId("system-label");
+// PMS / Imaging Systems
+const SYSTEM_MAP = {
+  "PMS / Practice Management System": [
+    "EagleSoft", "Dentrix", "DSN", "TDO", "PBS Endo",
+    "WinOMS", "WinDent", "Clinivision", "Endovision", "Other PMS"
+  ],
+  "Imaging Software": [
+    "Romexis", "CRD Dicom", "EZ3D-i", "Dexis", "Other Imaging"
+  ]
+};
 
-    clearSelect(subcategorySelect, "-- Select a category first --");
-    clearSelect(systemSelect, "-- Select a system --");
+// ------------------------------
+// Department Change Handler
+// ------------------------------
+document.getElementById("department").addEventListener("change", function () {
+  const dept = this.value;
 
-    subcategorySelect.classList.add("hidden");
-    subLabel.classList.add("hidden");
-    systemSelect.classList.add("hidden");
-    systemLabel.classList.add("hidden");
+  const category = document.getElementById("category");
+  const subcat = document.getElementById("subcategory");
+  const subcatLabel = document.getElementById("subcategory-label");
+  const system = document.getElementById("system");
+  const systemLabel = document.getElementById("system-label");
+  const wsSection = document.getElementById("ws-section");
 
-    if (dept !== "IT" || !category) return;
+  // Reset all dependent fields
+  category.innerHTML = `<option value="">-- Select a category --</option>`;
+  subcat.innerHTML = `<option value="">-- Select a subcategory --</option>`;
+  subcat.classList.add("hidden");
+  subcatLabel.classList.add("hidden");
+  system.classList.add("hidden");
+  systemLabel.classList.add("hidden");
 
-    // Subcategories for IT categories
-    const subcats = IT_SUBCATEGORY_MAP[category] || [];
-    if (subcats.length > 0) {
-      clearSelect(subcategorySelect, "-- Select a subcategory --");
-      populateSelect(subcategorySelect, subcats);
-      subLabel.classList.remove("hidden");
-      subcategorySelect.classList.remove("hidden");
-    }
-
-    // PMS / Imaging system list
-    if (category === "PMS / Practice Management System") {
-      populateSelect(systemSelect, PMS_SYSTEMS);
-      systemSelect.classList.remove("hidden");
-      systemLabel.classList.remove("hidden");
-    } else if (category === "Imaging Software") {
-      populateSelect(systemSelect, IMAGING_SYSTEMS);
-      systemSelect.classList.remove("hidden");
-      systemLabel.classList.remove("hidden");
-    }
-  }
-
-  // -------------------------
-  // Submit Ticket
-  // -------------------------
-  function onSubmit() {
-    const dept = byId("department").value;
-    const category = byId("category").value;
-    const subcategory = byId("subcategory").classList.contains("hidden")
-      ? ""
-      : byId("subcategory").value;
-
-    const system = byId("system").classList.contains("hidden")
-      ? ""
-      : byId("system").value;
-
-    const contactName = byId("contactName").value.trim();
-    const workstation = byId("workstation").value.trim();
-    const callback = byId("callback").value.trim();
-    const location = byId("location").value.trim();
-    const description = byId("description").value.trim();
-
-    // Required fields
-    if (!dept) return alert("Please select a Department.");
-    if (!category) return alert("Please select a Category.");
-    if (!contactName) return alert("Please enter the Contact Name.");
-    if (dept === "IT" && !workstation) return alert("Please enter the Workstation Name.");
-    if (!callback) return alert("Please enter a Callback Number.");
-
-    const toEmail = DEPARTMENT_EMAIL[dept] || DEPARTMENT_EMAIL["IT"];
-
-    let subject = `Ticket – ${dept}: ${category}`;
-    if (subcategory) subject += ` – ${subcategory}`;
-    if (location) subject += ` – (${location})`;
-
-    let body = "";
-    body += `<b>Department:</b> ${dept}<br/>`;
-    body += `<b>Category:</b> ${category}<br/>`;
-
-    if (subcategory) body += `<b>Subcategory:</b> ${subcategory}<br/>`;
-    if (system) body += `<b>PMS / Imaging System:</b> ${system}<br/>`;
-
-    body += `<b>Contact Name:</b> ${contactName}<br/>`;
-
-    if (dept === "IT") {
-      body += `<b>Workstation:</b> ${workstation}<br/>`;
-    }
-
-    if (location) body += `<b>Location Code:</b> ${location}<br/>`;
-    body += `<b>Callback Number:</b> ${callback}<br/><br/>`;
-    body += `<b>Description:</b><br/>${description.replace(/\n/g,"<br/>")}`;
-
-    Office.context.mailbox.displayNewMessageForm({
-      toRecipients: [toEmail],
-      subject,
-      htmlBody: body
-    });
-
-    // Close the taskpane after sending
-    if (Office.context.ui && Office.context.ui.closeContainer) {
-      Office.context.ui.closeContainer();
-    }
-  }
-
-  // -------------------------
-  // Wire events + Auto-fill Contact Name + Auto-save Contact Name
-  // -------------------------
-  function wireEvents() {
-    byId("department").addEventListener("change", onDepartmentChange);
-    byId("category").addEventListener("change", onCategoryChange);
-    byId("submitBtn").addEventListener("click", onSubmit);
-
-    const contactInput = byId("contactName");
-
-    // 1. Load saved name
-    const savedName = localStorage.getItem("contactName");
-    if (savedName) {
-      contactInput.value = savedName;
-    } else {
-      // 2. Fallback → load from Outlook profile
-      const userProfile = Office.context.mailbox?.userProfile;
-      if (userProfile && userProfile.displayName) {
-        contactInput.value = userProfile.displayName;
-      }
-    }
-
-    // 3. Save automatically as user types
-    contactInput.addEventListener("input", () => {
-      localStorage.setItem("contactName", contactInput.value.trim());
+  // Populate categories
+  if (CATEGORY_MAP[dept]) {
+    CATEGORY_MAP[dept].forEach(c => {
+      category.innerHTML += `<option value="${c}">${c}</option>`;
     });
   }
 
-  // -------------------------
-  // Initialize Add-in
-  // -------------------------
-  Office.onReady(() => {
-    if (document.readyState === "complete") wireEvents();
-    else document.addEventListener("DOMContentLoaded", wireEvents);
-  });
+  // Show workstation IF IT
+  if (dept === "IT") {
+    wsSection.classList.remove("hidden");
+  } else {
+    wsSection.classList.add("hidden");
+  }
+});
 
-})();
+// ------------------------------
+// Category Change Handler
+// ------------------------------
+document.getElementById("category").addEventListener("change", function () {
+  const cat = this.value;
+  const subcat = document.getElementById("subcategory");
+  const subcatLabel = document.getElementById("subcategory-label");
+  const system = document.getElementById("system");
+  const systemLabel = document.getElementById("system-label");
+
+  // Reset first
+  subcat.innerHTML = `<option value="">-- Select a subcategory --</option>`;
+  subcat.classList.add("hidden");
+  subcatLabel.classList.add("hidden");
+  system.classList.add("hidden");
+  systemLabel.classList.add("hidden");
+
+  // If this category has IT subcategories
+  if (SUBCATEGORY_MAP[cat]) {
+    subcat.classList.remove("hidden");
+    subcatLabel.classList.remove("hidden");
+
+    SUBCATEGORY_MAP[cat].forEach(s => {
+      subcat.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+
+  // If this category has a system selector
+  if (SYSTEM_MAP[cat]) {
+    system.classList.remove("hidden");
+    systemLabel.classList.remove("hidden");
+
+    SYSTEM_MAP[cat].forEach(s => {
+      system.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+});
+
+// ------------------------------
+// Submit Ticket
+// ------------------------------
+document.getElementById("submitBtn").addEventListener("click", function () {
+
+  Office.context.ui.closeContainer(); // Auto-close add-in taskpane
+
+  // Actual ticketing logic handled in back-end (email, system, etc.)
+});
