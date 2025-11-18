@@ -1,8 +1,16 @@
 /* ------------------------------------------------
-   DATA MAPS
+   DEPARTMENT → EMAIL ROUTING
 --------------------------------------------------*/
+const DEPARTMENT_EMAIL_MAP = {
+  "IT": "support@specialty1partners.com",
+  "CBO - Full Service": "cbo@specialty1partners.com",
+  "Payor Relations": "payorrelations@specialty1partners.com",
+  "RCM - Non Full Service": "rcm@specialty1partners.com"
+};
 
-// Categories per department
+/* ------------------------------------------------
+   CATEGORY MAP (Per Department)
+--------------------------------------------------*/
 const CATEGORY_MAP = {
   IT: [
     "PMS / Practice Management System",
@@ -76,7 +84,9 @@ const CATEGORY_MAP = {
   ]
 };
 
-// For IT: software lists for PMS & Imaging (subcategory level)
+/* ------------------------------------------------
+   IT SOFTWARE (2nd level)
+--------------------------------------------------*/
 const IT_SOFTWARE_MAP = {
   "PMS / Practice Management System": [
     "EagleSoft",
@@ -99,7 +109,9 @@ const IT_SOFTWARE_MAP = {
   ]
 };
 
-// For IT: issue types (sub-subcategory) for PMS & Imaging
+/* ------------------------------------------------
+   IT ISSUE TYPES (3rd level)
+--------------------------------------------------*/
 const IT_ISSUE_TYPE_MAP = {
   "PMS / Practice Management System": [
     "Access / Permissions",
@@ -118,7 +130,9 @@ const IT_ISSUE_TYPE_MAP = {
   ]
 };
 
-// For IT: normal one-level subcategories for *other* IT categories
+/* ------------------------------------------------
+   IT OTHER SUBCATEGORIES (single level)
+--------------------------------------------------*/
 const IT_OTHER_SUBCATEGORY_MAP = {
   "Email/Outlook": [
     "Cannot send",
@@ -129,7 +143,8 @@ const IT_OTHER_SUBCATEGORY_MAP = {
     "Add-in issue",
     "Other (Email)"
   ],
-  Teams: [
+
+  "Teams": [
     "Chat/Channels",
     "Meetings/Calls",
     "Screen sharing",
@@ -137,7 +152,8 @@ const IT_OTHER_SUBCATEGORY_MAP = {
     "Notifications",
     "Other (Teams)"
   ],
-  SharePoint: [
+
+  "SharePoint": [
     "Permissions/Access",
     "File sync/OneDrive",
     "Broken link",
@@ -145,7 +161,8 @@ const IT_OTHER_SUBCATEGORY_MAP = {
     "Version history/Restore",
     "Other (SharePoint)"
   ],
-  Hardware: [
+
+  "Hardware": [
     "Desktop/Laptop",
     "Docking station",
     "Monitor",
@@ -153,6 +170,7 @@ const IT_OTHER_SUBCATEGORY_MAP = {
     "Phone/Headset",
     "Other (Hardware)"
   ],
+
   "Network/Internet": [
     "No connectivity",
     "Slow network",
@@ -160,35 +178,35 @@ const IT_OTHER_SUBCATEGORY_MAP = {
     "Wi-Fi",
     "Other (Network)"
   ],
-  Security: [
+
+  "Security": [
     "Breach",
     "Incident",
     "Non-Critical"
   ],
-  RingCentral: [
+
+  "RingCentral": [
     "Phone hardware",
     "Call quality",
     "Fax send/receive",
     "Text send/receive",
     "Early office closure / schedule change"
   ],
-  Acumen: [
+
+  "Acumen": [
     "Access/Permissions",
     "Data Integrity",
     "New Reports",
     "Report Edits"
   ],
-  Other: [
-    "General / Not specified"
-  ]
+
+  "Other": ["General / Not specified"]
 };
 
 /* ------------------------------------------------
-   HELPERS
+   HELPER FUNCTIONS
 --------------------------------------------------*/
-
 function clearSelect(select, placeholder) {
-  if (!select) return;
   select.innerHTML = "";
   const opt = document.createElement("option");
   opt.value = "";
@@ -197,7 +215,6 @@ function clearSelect(select, placeholder) {
 }
 
 function fillSelect(select, values) {
-  if (!select || !Array.isArray(values)) return;
   values.forEach(v => {
     const opt = document.createElement("option");
     opt.value = v;
@@ -206,220 +223,117 @@ function fillSelect(select, values) {
   });
 }
 
-function showElement(el, show) {
-  if (!el) return;
-  if (show) {
-    el.classList.remove("hidden");
-  } else {
-    el.classList.add("hidden");
-  }
+function show(el, yes) {
+  el.classList[yes ? "remove" : "add"]("hidden");
 }
 
 /* ------------------------------------------------
-   FORM INITIALISATION
+   FORM INITIALIZATION
 --------------------------------------------------*/
-
-function initForm() {
-  const deptSelect = document.getElementById("department");
-  const categorySelect = document.getElementById("category");
-  const subSelect = document.getElementById("subcategory");
+document.addEventListener("DOMContentLoaded", () => {
+  const dept = document.getElementById("department");
+  const cat = document.getElementById("category");
+  const sub = document.getElementById("subcategory");
   const subLabel = document.getElementById("subcategory-label");
-  const subSubSelect = document.getElementById("subsubcategory");
-  const subSubLabel = document.getElementById("subsubcategory-label");
-  const wsSection = document.getElementById("ws-section");
-  const submitBtn = document.getElementById("submitBtn");
+  const subsub = document.getElementById("subsubcategory");
+  const subsubLabel = document.getElementById("subsubcategory-label");
+  const ws = document.getElementById("ws-section");
 
-  if (!deptSelect || !categorySelect || !submitBtn) {
-    console.log("Ticket form elements not found – check taskpane.html.");
-    return;
-  }
+  clearSelect(cat, "-- Select a category --");
 
-  // Department change
-  deptSelect.addEventListener("change", () => {
-    const dept = deptSelect.value;
+  dept.addEventListener("change", () => {
+    clearSelect(cat, "-- Select a category --");
+    clearSelect(sub, "-- Select a subcategory --");
+    clearSelect(subsub, "-- Select an issue type --");
 
-    clearSelect(categorySelect, "-- Select a category --");
-    clearSelect(subSelect, "-- Select a subcategory --");
-    clearSelect(subSubSelect, "-- Select an issue type --");
+    show(sub, false);
+    show(subLabel, false);
+    show(subsub, false);
+    show(subsubLabel, false);
 
-    showElement(subSelect, false);
-    showElement(subLabel, false);
-    showElement(subSubSelect, false);
-    showElement(subSubLabel, false);
-
-    if (CATEGORY_MAP[dept]) {
-      fillSelect(categorySelect, CATEGORY_MAP[dept]);
+    if (CATEGORY_MAP[dept.value]) {
+      fillSelect(cat, CATEGORY_MAP[dept.value]);
     }
 
-    showElement(wsSection, dept === "IT");
+    show(ws, dept.value === "IT");
   });
 
-  // Category change
-  categorySelect.addEventListener("change", () => {
-    const dept = deptSelect.value;
-    const cat = categorySelect.value;
+  cat.addEventListener("change", () => {
+    clearSelect(sub, "-- Select a subcategory --");
+    clearSelect(subsub, "-- Select an issue type --");
 
-    clearSelect(subSelect, "-- Select a subcategory --");
-    clearSelect(subSubSelect, "-- Select an issue type --");
+    show(sub, false);
+    show(subLabel, false);
+    show(subsub, false);
+    show(subsubLabel, false);
 
-    showElement(subSelect, false);
-    showElement(subLabel, false);
-    showElement(subSubSelect, false);
-    showElement(subSubLabel, false);
+    const deptVal = dept.value;
+    const catVal = cat.value;
 
-    if (dept === "IT") {
-      // PMS / Imaging special logic (software + issue type)
-      if (cat === "PMS / Practice Management System" || cat === "Imaging Software") {
-        fillSelect(subSelect, IT_SOFTWARE_MAP[cat]);
-        fillSelect(subSubSelect, IT_ISSUE_TYPE_MAP[cat]);
+    if (deptVal === "IT") {
+      if (IT_SOFTWARE_MAP[catVal]) {
+        fillSelect(sub, IT_SOFTWARE_MAP[catVal]);
+        show(sub, true);
+        show(subLabel, true);
 
-        showElement(subSelect, true);
-        showElement(subLabel, true);
-        showElement(subSubSelect, true);
-        showElement(subSubLabel, true);
-        return;
-      }
-
-      // Other IT categories – one-level list
-      const list = IT_OTHER_SUBCATEGORY_MAP[cat];
-      if (list) {
-        fillSelect(subSelect, list);
-        showElement(subSelect, true);
-        showElement(subLabel, true);
+        fillSelect(subsub, IT_ISSUE_TYPE_MAP[catVal]);
+        show(subsub, true);
+        show(subsubLabel, true);
+      } else if (IT_OTHER_SUBCATEGORY_MAP[catVal]) {
+        fillSelect(sub, IT_OTHER_SUBCATEGORY_MAP[catVal]);
+        show(sub, true);
+        show(subLabel, true);
       }
     }
   });
 
-  submitBtn.addEventListener("click", onSubmitClick);
-}
-
-/* ------------------------------------------------
-   OFFICE HELPERS
---------------------------------------------------*/
-
-function setSubjectSafe(subjectText) {
-  try {
-    if (
-      typeof Office !== "undefined" &&
-      Office.context?.mailbox?.item?.subject &&
-      typeof Office.context.mailbox.item.subject.setAsync === "function"
-    ) {
-      Office.context.mailbox.item.subject.setAsync(subjectText);
-    }
-  } catch (e) {
-    console.log("Subject set failed:", e);
-  }
-}
-
-function closeTaskpaneSafe() {
-  try {
-    Office.context?.ui?.closeContainer();
-  } catch (e) {}
-}
-
-/* ------------------------------------------------
-   UPDATED SUBMIT HANDLER  (FULL BODY + SUBJECT)
---------------------------------------------------*/
-
-function onSubmitClick() {
-  const dept = document.getElementById("department")?.value || "";
-  const category = document.getElementById("category")?.value || "";
-  const sub = document.getElementById("subcategory")?.value || "";
-  const subsub = document.getElementById("subsubcategory")?.value || "";
-  const contact = document.getElementById("contactName")?.value || "";
-  const callback = document.getElementById("callback")?.value || "";
-  const workstation = document.getElementById("workstation")?.value || "";
-  const location = document.getElementById("location")?.value || "";
-  const description = document.getElementById("description")?.value || "";
-
-  /* BUILD SUBJECT */
-  let detailParts = [];
-
-  if (dept === "IT") {
-    if (sub) detailParts.push(sub);
-    if (subsub) detailParts.push(subsub);
-  } else {
-    if (sub) detailParts.push(sub);
-  }
-
-  let subject = `Ticket – ${dept}: ${category}`;
-  if (detailParts.length) subject += ` – ${detailParts.join(" – ")}`;
-  if (location) subject += ` – (${location})`;
-
-  setSubjectSafe(subject);
-
-  /* BUILD BODY */
-  let body = `
-S1P Support Ticket
-
-Department: ${dept}
-Category: ${category}
-${sub ? `Subcategory: ${sub}` : ""}
-${subsub ? `Issue Type: ${subsub}` : ""}
-
-Contact Name: ${contact}
-Callback Number: ${callback}
-${dept === "IT" ? `Workstation: ${workstation}\n` : ""}
-Location Code: ${location}
-
-Description:
-${description}
-
-------------------------------
-(This ticket was generated using the S1P Outlook Add-in)
-`;
-
-  /* INSERT BODY */
-  try {
-    const item = Office.context?.mailbox?.item;
-
-    if (item?.body && typeof item.body.setAsync === "function") {
-      item.body.setAsync(body, { coercionType: Office.CoercionType.Text }, () => {
-        closeTaskpaneSafe();
-      });
-    } else if (Office.context.mailbox.displayNewMessageForm) {
-      Office.context.mailbox.displayNewMessageForm({
-        subject,
-        body
-      });
-      closeTaskpaneSafe();
-    } else {
-      console.log("Could not set body (no compose mode).");
-      closeTaskpaneSafe();
-    }
-  } catch (e) {
-    console.log("Body insertion failed:", e);
-    closeTaskpaneSafe();
-  }
-}
+  document.getElementById("submitBtn").addEventListener("click", submitTicket);
+});
 
 /* ------------------------------------------------
    CONTACT NAME AUTOFILL
 --------------------------------------------------*/
+Office.onReady(info => {
+  if (info.host !== Office.HostType.Outlook) return;
 
-if (typeof Office !== "undefined" && Office.onReady) {
-  Office.onReady(info => {
-    if (info.host !== Office.HostType.Outlook) return;
+  try {
+    const profile = Office.context.mailbox.userProfile;
+    const nameField = document.getElementById("contactName");
 
-    try {
-      const profile = Office.context.mailbox.userProfile;
-      const nameBox = document.getElementById("contactName");
-
-      if (profile?.displayName && nameBox) {
-        nameBox.value = profile.displayName;
-        localStorage.setItem("lastContactName", profile.displayName);
-      }
-
-      const saved = localStorage.getItem("lastContactName");
-      if (saved && nameBox) nameBox.value = saved;
-    } catch (e) {
-      console.log("Profile load error:", e);
+    if (profile && profile.displayName) {
+      nameField.value = profile.displayName;
+      localStorage.setItem("lastContactName", profile.displayName);
     }
-  });
-}
+
+    const saved = localStorage.getItem("lastContactName");
+    if (saved) nameField.value = saved;
+  } catch (e) {
+    console.log("Name autofill failed:", e);
+  }
+});
 
 /* ------------------------------------------------
-   DOM READY
+   SUBMIT — OPEN EMAIL WITH TO + SUBJECT
 --------------------------------------------------*/
+function submitTicket() {
+  const dept = document.getElementById("department").value;
+  const cat = document.getElementById("category").value;
+  const sub = document.getElementById("subcategory").value;
+  const subsub = document.getElementById("subsubcategory").value;
+  const loc = document.getElementById("location").value;
 
-document.addEventListener("DOMContentLoaded", initForm);
+  const detail = [sub, subsub].filter(v => v).join(" – ");
+
+  let subject = `Ticket – ${dept}: ${cat}`;
+  if (detail) subject += ` – ${detail}`;
+  if (loc) subject += ` – (${loc})`;
+
+  const email = DEPARTMENT_EMAIL_MAP[dept];
+
+  Office.context.mailbox.displayNewMessageForm({
+    toRecipients: [email],
+    subject: subject
+  });
+
+  try { Office.context.ui.messageParent("close"); } catch {}
+}
