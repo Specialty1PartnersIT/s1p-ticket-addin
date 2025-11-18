@@ -9,18 +9,17 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f3f3f3; /* Light neutral Fluent background */
+      background: #f3f3f3;
       margin: 0;
       padding: 20px;
     }
 
-    /* Card Container */
+    /* Card */
     .card {
       background: #ffffff;
       border: 1px solid #d0d0d0;
       border-radius: 10px;
       padding: 24px;
-      max-width: 100%;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
@@ -29,8 +28,8 @@
       margin-bottom: 20px;
       font-size: 22px;
       font-weight: 600;
-      color: #1a1a1a;
       text-align: center;
+      color: #1a1a1a;
     }
 
     label {
@@ -80,7 +79,6 @@
       display: none;
     }
 
-    /* Workstation hint */
     .inline-hint {
       font-size: 13px;
       color: #555;
@@ -89,12 +87,11 @@
       display: block;
     }
 
-    /* Attachment reminder */
     .attachment-note {
       margin-top: 12px;
       font-size: 14px;
       font-weight: 600;
-      color: #0a65c2; /* Fluent blue */
+      color: #0a65c2;
       text-align: center;
     }
   </style>
@@ -138,12 +135,14 @@
     <label for="contactName">Contact Name (Required):</label>
     <input id="contactName" placeholder="Your name">
 
-    <!-- WORKSTATION -->
-    <label id="ws-label" for="workstation">Workstation Name (Required for IT):</label>
-    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
-    <small id="ws-hint" class="inline-hint">
-      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the value shown as <strong>Device name</strong>.
-    </small>
+    <!-- WORKSTATION (IT only) -->
+    <div id="ws-section" class="hidden">
+      <label id="ws-label" for="workstation">Workstation Name (Required for IT):</label>
+      <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+      <small id="ws-hint" class="inline-hint">
+        Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the <strong>Device name</strong>.
+      </small>
+    </div>
 
     <!-- CALLBACK NUMBER -->
     <label for="callback">Callback Number (Required):</label>
@@ -160,7 +159,6 @@
     <!-- SUBMIT -->
     <button id="submitBtn">Submit Ticket</button>
 
-    <!-- ATTACHMENT MESSAGE -->
     <p class="attachment-note">
       After submitting, you’ll be able to attach screenshots or files in the next screen.
     </p>
