@@ -102,6 +102,8 @@ const IT_SOFTWARE_MAP = {
   ],
   "Imaging Software": [
     "CRD Dicom",
+    "CareStream",
+    "Sidexis",
     "Romexis",
     "EZ3D-i",
     "Dexis",
@@ -361,4 +363,5 @@ ${desc.replace(/\n/g, "<br>")}
   // Close taskpane in OWA
   try { Office.context.ui.messageParent("close"); } catch {}
 }
+
 
