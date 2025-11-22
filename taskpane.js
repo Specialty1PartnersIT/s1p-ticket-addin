@@ -1,4 +1,15 @@
 /* ------------------------------------------------
+   HOST DETECTION (Teams vs Outlook vs Standalone)
+--------------------------------------------------*/
+function getHostEnvironment() {
+  if (window.microsoftTeams && microsoftTeams.app) return "teams";
+  if (window.Office && Office.context && Office.context.mailbox) return "outlook";
+  return "web";
+}
+
+let S1P_HOST = getHostEnvironment();
+
+/* ------------------------------------------------
    DEPARTMENT → EMAIL ROUTING
 --------------------------------------------------*/
 const DEPARTMENT_EMAIL_MAP = {
@@ -293,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ------------------------------------------------
-   CONTACT NAME AUTOFILL
+   CONTACT NAME AUTOFILL (Outlook Only)
 --------------------------------------------------*/
 Office.onReady(info => {
   if (info.host !== Office.HostType.Outlook) return;
@@ -315,7 +326,9 @@ Office.onReady(info => {
 });
 
 /* ------------------------------------------------
-   SUBMIT — OPEN EMAIL WITH TO + SUBJECT
+   SUBMIT LOGIC
+   Outlook → Opens email draft
+   Teams → Calls webhook or future API endpoint
 --------------------------------------------------*/
 function submitTicket() {
   const dept = document.getElementById("department").value;
@@ -330,12 +343,10 @@ function submitTicket() {
 
   const detail = [sub, subsub].filter(v => v).join(" – ");
 
-  // Subject
   let subject = `Ticket – ${dept}: ${cat}`;
   if (detail) subject += ` – ${detail}`;
   if (loc) subject += ` – (${loc})`;
 
-  // BODY TEMPLATE (HTML for better formatting)
   let body = `
 <b>Contact Name:</b> ${contact}<br>
 <b>Callback Number:</b> ${callback}<br>
@@ -350,18 +361,34 @@ ${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
 ${desc.replace(/\n/g, "<br>")}
   `;
 
-  // Who does it go to?
   const email = DEPARTMENT_EMAIL_MAP[dept];
 
-  // 🚀 OPEN EMAIL WITH TO, SUBJECT, AND BODY INSERTED
-  Office.context.mailbox.displayNewMessageForm({
-    toRecipients: [email],
-    subject: subject,
-    htmlBody: body
-  });
+  /* ---------- Outlook Flow (UNCHANGED) ---------- */
+  if (S1P_HOST === "outlook") {
+    Office.context.mailbox.displayNewMessageForm({
+      toRecipients: [email],
+      subject: subject,
+      htmlBody: body
+    });
 
-  // Close taskpane in OWA
-  try { Office.context.ui.messageParent("close"); } catch {}
+    try { Office.context.ui.messageParent("close"); } catch {}
+    return;
+  }
+
+  /* ---------- Teams Flow (NEW & SAFE) ---------- */
+  if (S1P_HOST === "teams") {
+    alert("✔ Ticket form submitted in Teams.\n(Next step: connect to Webhook/API backend)");
+
+    // This is where you will later call:
+    // fetch("https://your-ticket-api/new", { method: "POST", body: JSON.stringify({...}) })
+
+    console.log("Teams submission payload:", {
+      dept, cat, sub, subsub, loc, contact, callback, workstation, desc
+    });
+
+    return;
+  }
+
+  /* ---------- Web/Standalone ---------- */
+  alert("Form submitted — not in Outlook or Teams.");
 }
-
-
