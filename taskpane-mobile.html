@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>S1P IT Mobile Ticket</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="taskpane_mobile.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #d0d0d0;
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      color: #1a1a1a;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 10px;
+      display: block;
+      color: #333;
+      font-size: 14px;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+      background: #fafafa;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #0a65c2;
+      outline: none;
+      background: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    button {
+      background-color: #0078d4;
+      color: white;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    button:hover {
+      background-color: #005a9e;
+    }
+
+    .inline-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .inline-row label {
+      margin-top: 0;
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .inline-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .attachment-note {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0a65c2;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <h3>S1P IT Mobile Ticket</h3>
+
+    <!-- CONTACT NAME -->
+    <label for="contactName">Contact Name (Required):</label>
+    <input id="contactName" placeholder="Your name" />
+
+    <!-- CALLBACK NUMBER -->
+    <label for="callback">Callback Number (Required):</label>
+    <input id="callback" placeholder="e.g. 555-123-4567" />
+
+    <!-- LOCATION CODE (free type) -->
+    <label for="location">Location Code:</label>
+    <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
+
+    <!-- CATEGORY (IT only, outage-focused) -->
+    <label for="category">Issue Category:</label>
+    <select id="category">
+      <option value="">-- Select a category --</option>
+      <!-- Options will be injected by JS, but you can hard-code too -->
+    </select>
+
+    <!-- SUBCATEGORY (simple, one level) -->
+    <label id="subcategory-label" for="subcategory">Subcategory:</label>
+    <select id="subcategory">
+      <option value="">-- Select a subcategory (optional) --</option>
+    </select>
+
+    <!-- CRITICAL TOGGLE -->
+    <div class="inline-row">
+      <input type="checkbox" id="critical" />
+      <label for="critical">Mark this ticket as critical / urgent</label>
+    </div>
+    <div class="note">
+      Use for full office outages, major system down, or urgent production impact.
+    </div>
+
+    <!-- DESCRIPTION -->
+    <label for="description">Description:</label>
+    <textarea id="description" rows="5"
+      placeholder="Briefly describe the issue (what/where/impact)..."></textarea>
+
+    <!-- SUBMIT -->
+    <button id="submitBtn">Submit IT Ticket</button>
+
+    <p class="attachment-note">
+      After submitting, you can attach screenshots or files in the email screen.
+    </p>
+
+  </div>
+
+</body>
+</html>
