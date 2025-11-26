@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
   <title>S1P Support Ticket</title>
-
-  <!-- Existing Outlook Add-in script (do NOT remove) -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-
-  <!-- NEW: Teams SDK (safe to load even inside Outlook) -->
-  <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+  <script src="taskpane.js"></script>
 
   <style>
     body {
@@ -17,15 +13,13 @@
       margin: 0;
       padding: 20px;
     }
-
     .card {
       background: #ffffff;
       border: 1px solid #d0d0d0;
       border-radius: 10px;
       padding: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     h3 {
       margin-top: 0;
       margin-bottom: 20px;
@@ -34,7 +28,6 @@
       text-align: center;
       color: #1a1a1a;
     }
-
     label {
       font-weight: 600;
       margin-top: 12px;
@@ -42,7 +35,6 @@
       color: #333;
       font-size: 14px;
     }
-
     input, textarea, select, button {
       width: 100%;
       padding: 10px;
@@ -54,38 +46,17 @@
       font-size: 14px;
       background: #fafafa;
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #0a65c2;
-      outline: none;
-      background: #fff;
-    }
-
     button {
       background-color: #0078d4;
       color: white;
-      font-size: 15px;
       border: none;
       border-radius: 6px;
-      cursor: pointer;
       padding: 12px;
+      font-size: 15px;
       font-weight: 600;
-      margin-top: 10px;
+      cursor: pointer;
     }
-
-    button:hover {
-      background-color: #005a9e;
-    }
-
     .hidden { display: none; }
-
-    .inline-hint {
-      font-size: 14px;
-      color: #444;
-      margin-top: -6px;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
 
     .attachment-note {
       margin-top: 12px;
@@ -106,7 +77,7 @@
   <!-- DEPARTMENT -->
   <label for="department">Support Department:</label>
   <select id="department">
-    <option value="">-- Select a support department --</option>
+    <option value="">-- Select a department --</option>
     <option value="IT">IT</option>
     <option value="CBO - Full Service">CBO - Full Service</option>
     <option value="Payor Relations">Payor Relations</option>
@@ -119,7 +90,7 @@
     <option value="">-- Select a category --</option>
   </select>
 
-  <!-- SUBCATEGORY -->
+  <!-- SUBCATEGORY (IT only) -->
   <label id="subcategory-label" class="hidden" for="subcategory">Subcategory:</label>
   <select id="subcategory" class="hidden">
     <option value="">-- Select a subcategory --</option>
@@ -128,82 +99,67 @@
   <!-- SUB-SUBCATEGORY -->
   <label id="subsubcategory-label" class="hidden" for="subsubcategory">Issue Type:</label>
   <select id="subsubcategory" class="hidden">
-    <option value="">-- Select an issue type --</option>
+    <option value="">-- Select issue type --</option>
   </select>
 
   <!-- CONTACT NAME -->
   <label for="contactName">Contact Name (Required):</label>
-  <input id="contactName" placeholder="Your name" />
+  <input id="contactName" placeholder="Your name">
 
-  <!-- WORKSTATION (IT only) -->
+  <!-- WORKSTATION NAME – only IT, except New Hire -->
   <div id="ws-section" class="hidden">
-    <label for="workstation">Workstation Name (Required for IT):</label>
-    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05" />
-    <small class="inline-hint">
-      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the device name.
-    </small>
+    <label for="workstation">Workstation Name:</label>
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
   </div>
 
   <!-- CALLBACK -->
-  <label for="callback">Callback Number (Required):</label>
-  <input id="callback" placeholder="e.g. 555-123-4567" />
+  <div id="callback-section">
+    <label for="callback">Callback Number (Required):</label>
+    <input id="callback" placeholder="e.g. 555-123-4567">
+  </div>
 
   <!-- LOCATION -->
-  <label for="location">Location Code:</label>
-  <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
+  <div id="location-section">
+    <label for="location">Location Code:</label>
+    <input id="location" placeholder="e.g. END073, PO0806, OS0609">
+  </div>
+
+  <!-- NEW HIRE SECTION -->
+  <div id="newhire-section" class="hidden">
+
+    <label for="nh-name">New Hire Name:</label>
+    <input id="nh-name" placeholder="First Last">
+
+    <label for="nh-title">New Hire Title:</label>
+    <input id="nh-title" placeholder="Job Title">
+
+    <label for="nh-role">Worker Type:</label>
+    <select id="nh-role">
+      <option value="">-- Select worker type --</option>
+      <option value="Remote Worker">Remote Worker</option>
+      <option value="Support Center Staff">Support Center Staff</option>
+      <option value="Practice Staff">Practice Staff</option>
+    </select>
+
+    <!-- REMOTE EQUIPMENT -->
+    <div id="equipment-section" class="hidden">
+      <label for="equipment">Equipment Needed:</label>
+      <textarea id="equipment" rows="4" placeholder="Laptop, Dock, Monitor, Headset, etc."></textarea>
+    </div>
+
+  </div>
 
   <!-- DESCRIPTION -->
   <label for="description">Description:</label>
-  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
+  <textarea id="description" rows="5" placeholder="Describe the issue..."></textarea>
 
-  <!-- SUBMIT -->
   <button id="submitBtn">Submit Ticket</button>
 
   <p class="attachment-note">
-    After submitting, you’ll be able to attach screenshots or files in the next screen.
+    After submitting, you may attach screenshots/files in the next screen.
   </p>
 
 </div>
-
-<!-- Existing Outlook logic -->
-<script src="taskpane.js"></script>
-
-<!-- NEW: Add Teams + Outlook host detection bootstrap -->
-<script>
-  (function () {
-    const isTeams = !!(window.microsoftTeams && microsoftTeams.app);
-
-    if (isTeams) {
-      // Initialize Teams — SAFE, DOES NOT AFFECT OUTLOOK
-      microsoftTeams.app.initialize().then(() => {
-        console.log("S1P Support: Running inside Microsoft Teams");
-
-        // Tell Teams the tab is ready
-        if (microsoftTeams.app.notifySuccess) {
-          microsoftTeams.app.notifySuccess();
-        }
-
-        // Get Teams context (optional)
-        microsoftTeams.app.getContext().then(ctx => {
-          console.log("Teams Context:", ctx);
-          // You can expose this to taskpane.js if needed
-          window.s1pTeamsContext = ctx;
-        });
-      }).catch(err => {
-        console.error("Teams initialization failed:", err);
-      });
-
-    } else if (window.Office && Office.onReady) {
-      // Outlook Add-in (unchanged)
-      Office.onReady().then(() => {
-        console.log("S1P Support: Running inside Outlook add-in");
-      });
-    } else {
-      console.log("S1P Support: Running as standalone webpage");
-    }
-
-  })();
-</script>
 
 </body>
 </html>
