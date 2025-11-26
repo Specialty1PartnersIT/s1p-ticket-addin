@@ -4,10 +4,7 @@
   <meta charset="utf-8" />
   <title>S1P Support Ticket</title>
 
-  <!-- Outlook Add-in script -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-
-  <!-- Teams SDK (safe to load even inside Outlook) -->
   <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
 
   <style>
@@ -17,15 +14,13 @@
       margin: 0;
       padding: 20px;
     }
-
     .card {
       background: #ffffff;
       border: 1px solid #d0d0d0;
       border-radius: 10px;
       padding: 24px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     h3 {
       margin-top: 0;
       margin-bottom: 20px;
@@ -34,7 +29,6 @@
       text-align: center;
       color: #1a1a1a;
     }
-
     label {
       font-weight: 600;
       margin-top: 12px;
@@ -42,7 +36,6 @@
       color: #333;
       font-size: 14px;
     }
-
     input, textarea, select, button {
       width: 100%;
       padding: 10px;
@@ -54,31 +47,16 @@
       font-size: 14px;
       background: #fafafa;
     }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: #0a65c2;
-      outline: none;
-      background: #fff;
-    }
-
     button {
       background-color: #0078d4;
       color: white;
-      font-size: 15px;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
-      padding: 12px;
       font-weight: 600;
-      margin-top: 10px;
+      padding: 12px;
     }
-
-    button:hover {
-      background-color: #005a9e;
-    }
-
+    button:hover { background-color: #005a9e; }
     .hidden { display: none; }
-
     .inline-hint {
       font-size: 14px;
       color: #444;
@@ -86,19 +64,10 @@
       margin-bottom: 10px;
       font-weight: 600;
     }
-
     .attachment-note {
-      margin-top: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #0a65c2;
       text-align: center;
-    }
-
-    .section-divider {
-      border: 0;
-      border-top: 1px solid #ddd;
-      margin: 16px 0;
+      color: #0a65c2;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -127,111 +96,71 @@
 
   <!-- SUBCATEGORY -->
   <label id="subcategory-label" class="hidden" for="subcategory">Subcategory:</label>
-  <select id="subcategory" class="hidden">
-    <option value="">-- Select a subcategory --</option>
-  </select>
+  <select id="subcategory" class="hidden"></select>
 
   <!-- SUB-SUBCATEGORY -->
   <label id="subsubcategory-label" class="hidden" for="subsubcategory">Issue Type:</label>
-  <select id="subsubcategory" class="hidden">
-    <option value="">-- Select an issue type --</option>
-  </select>
+  <select id="subsubcategory" class="hidden"></select>
 
   <!-- CONTACT NAME -->
   <label for="contactName">Contact Name (Required):</label>
-  <input id="contactName" placeholder="Your name" />
+  <input id="contactName" placeholder="Your name">
 
-  <!-- WORKSTATION (IT only / not for New Hire) -->
-  <div id="ws-section" class="hidden">
-    <label for="workstation">Workstation Name (Required for IT):</label>
-    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05" />
-    <small class="inline-hint">
-      Windows: Go to <strong>Settings &gt; System &gt; About</strong> and use the device name.
-    </small>
-  </div>
-
-  <!-- CALLBACK -->
-  <div id="callback-section">
-    <label for="callback">Callback Number (Required):</label>
-    <input id="callback" placeholder="e.g. 555-123-4567" />
-  </div>
-
-  <!-- LOCATION -->
-  <div id="location-section">
-    <label for="location">Location Code:</label>
-    <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
-  </div>
-
-  <!-- NEW HIRE SECTION (IT → User account creations / New hire setup) -->
+  <!-- NEW HIRE SECTION -->
   <div id="newhire-section" class="hidden">
-    <hr class="section-divider" />
-    <label for="newhire-name">New Hire Name:</label>
-    <input id="newhire-name" placeholder="First Last" />
+    <label for="nh-name">New Hire Full Name:</label>
+    <input id="nh-name" placeholder="First Last">
 
-    <label for="newhire-title">New Hire Title:</label>
-    <input id="newhire-title" placeholder="e.g. Dental Assistant" />
+    <label for="nh-title">New Hire Title:</label>
+    <input id="nh-title" placeholder="Job Title">
 
-    <label for="worker-type">Worker Type:</label>
-    <select id="worker-type">
+    <label for="nh-type">Worker Type:</label>
+    <select id="nh-type">
       <option value="">-- Select worker type --</option>
       <option value="Remote Worker">Remote Worker</option>
       <option value="Support Center Staff">Support Center Staff</option>
       <option value="Practice Staff">Practice Staff</option>
     </select>
 
-    <div id="equipment-section" class="hidden">
-      <label for="equipment-needed">Equipment Needed (Remote Only):</label>
-      <textarea id="equipment-needed" rows="4"
-        placeholder="List equipment needed (laptop, dock, monitors, headset, etc.)"></textarea>
+    <div id="nh-equipment-section" class="hidden">
+      <label for="nh-equipment">Equipment Needed:</label>
+      <textarea id="nh-equipment" rows="4" placeholder="Laptop, dock, monitors, headset, etc."></textarea>
     </div>
+  </div>
+
+  <!-- WORKSTATION (IT only) -->
+  <div id="ws-section" class="hidden">
+    <label for="workstation">Workstation Name (Required for IT):</label>
+    <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05">
+    <small class="inline-hint">Windows: Settings → System → About → Device name</small>
+  </div>
+
+  <!-- CALLBACK -->
+  <div id="callback-section">
+    <label for="callback">Callback Number (Required):</label>
+    <input id="callback" placeholder="e.g. 555-123-4567">
+  </div>
+
+  <!-- LOCATION -->
+  <div id="location-section">
+    <label for="location">Location Code:</label>
+    <input id="location" placeholder="e.g. END073, PO0806, OS0609">
   </div>
 
   <!-- DESCRIPTION -->
   <label for="description">Description:</label>
-  <textarea id="description" rows="6" placeholder="Describe the issue in detail..."></textarea>
+  <textarea id="description" rows="6"></textarea>
 
   <!-- SUBMIT -->
   <button id="submitBtn">Submit Ticket</button>
 
   <p class="attachment-note">
-    After submitting, you’ll be able to attach screenshots or files in the next screen.
+    After submitting, you’ll be able to attach screenshots or files.
   </p>
 
 </div>
 
-<!-- Main logic -->
 <script src="taskpane.js"></script>
-
-<!-- Teams / Outlook host bootstrap -->
-<script>
-  (function () {
-    const isTeams = !!(window.microsoftTeams && microsoftTeams.app);
-
-    if (isTeams) {
-      microsoftTeams.app.initialize().then(() => {
-        console.log("S1P Support: Running inside Microsoft Teams");
-
-        if (microsoftTeams.app.notifySuccess) {
-          microsoftTeams.app.notifySuccess();
-        }
-
-        microsoftTeams.app.getContext().then(ctx => {
-          console.log("Teams Context:", ctx);
-          window.s1pTeamsContext = ctx;
-        });
-      }).catch(err => {
-        console.error("Teams initialization failed:", err);
-      });
-
-    } else if (window.Office && Office.onReady) {
-      Office.onReady().then(() => {
-        console.log("S1P Support: Running inside Outlook add-in");
-      });
-    } else {
-      console.log("S1P Support: Running as standalone webpage");
-    }
-  })();
-</script>
 
 </body>
 </html>
