@@ -1,15 +1,4 @@
 /* ------------------------------------------------
-   HOST DETECTION (Teams vs Outlook vs Standalone)
---------------------------------------------------*/
-function getHostEnvironment() {
-  if (window.microsoftTeams && microsoftTeams.app) return "teams";
-  if (window.Office && Office.context && Office.context.mailbox) return "outlook";
-  return "web";
-}
-
-let S1P_HOST = getHostEnvironment();
-
-/* ------------------------------------------------
    CONSTANTS
 --------------------------------------------------*/
 const IT_NEW_HIRE_CATEGORY = "User account creation / new hire setup";
@@ -39,7 +28,7 @@ const CATEGORY_MAP = {
     "Security",
     "RingCentral",
     "Acumen",
-    IT_NEW_HIRE_CATEGORY,          // 🔹 new category
+    IT_NEW_HIRE_CATEGORY,
     "Other"
   ],
 
@@ -223,9 +212,31 @@ const IT_OTHER_SUBCATEGORY_MAP = {
 };
 
 /* ------------------------------------------------
+   HOST DETECTION
+--------------------------------------------------*/
+function getHostEnvironment() {
+  try {
+    if (window.Office && Office.context && Office.context.mailbox) {
+      return "outlook";
+    }
+  } catch (e) {
+    // ignore
+  }
+  try {
+    if (window.microsoftTeams && microsoftTeams.app) {
+      return "teams";
+    }
+  } catch (e) {
+    // ignore
+  }
+  return "web";
+}
+
+/* ------------------------------------------------
    HELPER FUNCTIONS
 --------------------------------------------------*/
 function clearSelect(select, placeholder) {
+  if (!select) return;
   select.innerHTML = "";
   const opt = document.createElement("option");
   opt.value = "";
@@ -234,6 +245,7 @@ function clearSelect(select, placeholder) {
 }
 
 function fillSelect(select, values) {
+  if (!select || !values) return;
   values.forEach(v => {
     const opt = document.createElement("option");
     opt.value = v;
@@ -248,9 +260,14 @@ function show(el, yes) {
 }
 
 /* ------------------------------------------------
-   FORM INITIALIZATION
+   FORM WIRING
 --------------------------------------------------*/
-document.addEventListener("DOMContentLoaded", () => {
+let formInitialized = false;
+
+function initFormWiring() {
+  if (formInitialized) return;
+  formInitialized = true;
+
   const dept = document.getElementById("department");
   const cat = document.getElementById("category");
   const sub = document.getElementById("subcategory");
@@ -268,80 +285,84 @@ document.addEventListener("DOMContentLoaded", () => {
   clearSelect(cat, "-- Select a category --");
 
   // Department change
-  dept.addEventListener("change", () => {
-    clearSelect(cat, "-- Select a category --");
-    clearSelect(sub, "-- Select a subcategory --");
-    clearSelect(subsub, "-- Select an issue type --");
+  if (dept) {
+    dept.addEventListener("change", () => {
+      clearSelect(cat, "-- Select a category --");
+      clearSelect(sub, "-- Select a subcategory --");
+      clearSelect(subsub, "-- Select an issue type --");
 
-    show(sub, false);
-    show(subLabel, false);
-    show(subsub, false);
-    show(subsubLabel, false);
+      show(sub, false);
+      show(subLabel, false);
+      show(subsub, false);
+      show(subsubLabel, false);
 
-    // reset special sections
-    show(newHireSection, false);
-    show(equipmentSection, false);
-    show(callbackSection, true);
-    show(locationSection, true);
+      // reset special sections
+      show(newHireSection, false);
+      show(equipmentSection, false);
+      show(callbackSection, true);
+      show(locationSection, true);
 
-    if (CATEGORY_MAP[dept.value]) {
-      fillSelect(cat, CATEGORY_MAP[dept.value]);
-    }
+      if (CATEGORY_MAP[dept.value]) {
+        fillSelect(cat, CATEGORY_MAP[dept.value]);
+      }
 
-    show(ws, dept.value === "IT");
-  });
+      show(ws, dept.value === "IT");
+    });
+  }
 
   // Category change
-  cat.addEventListener("change", () => {
-    clearSelect(sub, "-- Select a subcategory --");
-    clearSelect(subsub, "-- Select an issue type --");
+  if (cat) {
+    cat.addEventListener("change", () => {
+      clearSelect(sub, "-- Select a subcategory --");
+      clearSelect(subsub, "-- Select an issue type --");
 
-    show(sub, false);
-    show(subLabel, false);
-    show(subsub, false);
-    show(subsubLabel, false);
+      show(sub, false);
+      show(subLabel, false);
+      show(subsub, false);
+      show(subsubLabel, false);
 
-    const deptVal = dept.value;
-    const catVal = cat.value;
-    const isIT = deptVal === "IT";
-    const isNewHire = isIT && catVal === IT_NEW_HIRE_CATEGORY;
+      const deptVal = dept.value;
+      const catVal = cat.value;
+      const isIT = deptVal === "IT";
+      const isNewHire = isIT && catVal === IT_NEW_HIRE_CATEGORY;
 
-    // Reset new hire / visibility
-    show(newHireSection, false);
-    show(equipmentSection, false);
+      // Reset new hire / visibility
+      show(newHireSection, false);
+      show(equipmentSection, false);
 
-    if (isNewHire) {
-      // New hire: hide workstation, callback, location; show new hire fields
-      show(ws, false);
-      show(callbackSection, false);
-      show(locationSection, false);
-      show(newHireSection, true);
-      // No subcategories or issue type for new hire
-      return;
-    }
-
-    // Non–new-hire: restore callback/location and ws as usual
-    show(callbackSection, true);
-    show(locationSection, true);
-    show(ws, isIT);
-
-    // Existing IT logic
-    if (isIT) {
-      if (IT_SOFTWARE_MAP[catVal]) {
-        fillSelect(sub, IT_SOFTWARE_MAP[catVal]);
-        show(sub, true);
-        show(subLabel, true);
-
-        fillSelect(subsub, IT_ISSUE_TYPE_MAP[catVal]);
-        show(subsub, true);
-        show(subsubLabel, true);
-      } else if (IT_OTHER_SUBCATEGORY_MAP[catVal]) {
-        fillSelect(sub, IT_OTHER_SUBCATEGORY_MAP[catVal]);
-        show(sub, true);
-        show(subLabel, true);
+      if (isNewHire) {
+        // New hire: hide workstation, callback, location; show new hire fields
+        show(ws, false);
+        show(callbackSection, false);
+        show(locationSection, false);
+        show(newHireSection, true);
+        // No subcategories or issue type for new hire
+        return;
       }
-    }
-  });
+
+      // Non–new-hire: restore callback/location and ws as usual
+      show(callbackSection, true);
+      show(locationSection, true);
+      show(ws, isIT);
+
+      // Existing IT logic
+      if (isIT) {
+        if (IT_SOFTWARE_MAP[catVal]) {
+          fillSelect(sub, IT_SOFTWARE_MAP[catVal]);
+          show(sub, true);
+          show(subLabel, true);
+
+          fillSelect(subsub, IT_ISSUE_TYPE_MAP[catVal]);
+          show(subsub, true);
+          show(subsubLabel, true);
+        } else if (IT_OTHER_SUBCATEGORY_MAP[catVal]) {
+          fillSelect(sub, IT_OTHER_SUBCATEGORY_MAP[catVal]);
+          show(sub, true);
+          show(subLabel, true);
+        }
+      }
+    });
+  }
 
   // Worker Type change (for new hire) – show equipment only for Remote worker
   if (workerTypeSelect) {
@@ -351,54 +372,77 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Submit handler
-  document.getElementById("submitBtn").addEventListener("click", submitTicket);
-});
+  const submitBtn = document.getElementById("submitBtn");
+  if (submitBtn) {
+    submitBtn.addEventListener("click", submitTicket);
+  }
+}
 
 /* ------------------------------------------------
    CONTACT NAME AUTOFILL (Outlook Only)
 --------------------------------------------------*/
-Office.onReady(info => {
-  if (info.host !== Office.HostType.Outlook) return;
-
+function initContactAutofill() {
   try {
-    const profile = Office.context.mailbox.userProfile;
+    const info = Office.context && Office.context.mailbox && Office.context.mailbox.userProfile;
     const nameField = document.getElementById("contactName");
-
-    if (profile && profile.displayName && nameField) {
-      nameField.value = profile.displayName;
-      localStorage.setItem("lastContactName", profile.displayName);
+    if (info && info.displayName && nameField) {
+      nameField.value = info.displayName;
+      localStorage.setItem("lastContactName", info.displayName);
     }
 
     const saved = localStorage.getItem("lastContactName");
-    if (saved && nameField) nameField.value = saved;
+    if (saved && nameField && !nameField.value) {
+      nameField.value = saved;
+    }
   } catch (e) {
     console.log("Name autofill failed:", e);
   }
-});
+}
 
 /* ------------------------------------------------
    SUBMIT LOGIC
 --------------------------------------------------*/
 function submitTicket() {
-  const dept = document.getElementById("department").value;
-  const cat = document.getElementById("category").value;
-  const sub = document.getElementById("subcategory").value;
-  const subsub = document.getElementById("subsubcategory").value;
-  const loc = document.getElementById("location").value;
-  const contact = document.getElementById("contactName").value;
-  const callback = document.getElementById("callback").value;
+  const dept = (document.getElementById("department") || {}).value || "";
+  const cat = (document.getElementById("category") || {}).value || "";
+  const sub = (document.getElementById("subcategory") || {}).value || "";
+  const subsub = (document.getElementById("subsubcategory") || {}).value || "";
+  const loc = (document.getElementById("location") || {}).value || "";
+  const contact = (document.getElementById("contactName") || {}).value || "";
+  const callback = (document.getElementById("callback") || {}).value || "";
   const workstationEl = document.getElementById("workstation");
   const workstation = workstationEl ? workstationEl.value : "";
-  const desc = document.getElementById("description").value;
+  const desc = (document.getElementById("description") || {}).value || "";
 
-  const newHireName = document.getElementById("newhire-name")?.value.trim() || "";
-  const newHireTitle = document.getElementById("newhire-title")?.value.trim() || "";
-  const workerType = document.getElementById("worker-type")?.value || "";
-  const equipment = document.getElementById("equipment")?.value || "";
+  const newHireName = (document.getElementById("newhire-name") || {}).value?.trim() || "";
+  const newHireTitle = (document.getElementById("newhire-title") || {}).value?.trim() || "";
+  const workerType = (document.getElementById("worker-type") || {}).value || "";
+  const equipment = (document.getElementById("equipment") || {}).value || "";
 
   const isNewHire = dept === "IT" && cat === IT_NEW_HIRE_CATEGORY;
-
   const detail = [sub, subsub].filter(v => v).join(" – ");
+
+  const email = DEPARTMENT_EMAIL_MAP[dept];
+
+  if (!dept || !cat || !email) {
+    alert("Please select a department and category before submitting.");
+    return;
+  }
+
+  if (!contact) {
+    alert("Contact Name is required.");
+    return;
+  }
+
+  if (!isNewHire && !callback) {
+    alert("Callback Number is required.");
+    return;
+  }
+
+  if (dept === "IT" && !isNewHire && !workstation) {
+    alert("Please provide the workstation name for IT tickets.");
+    return;
+  }
 
   let subject;
   let body;
@@ -408,24 +452,25 @@ function submitTicket() {
     subject = `New Hire – ${newHireName || "Name TBA"} – ${workerType || "Worker type"}`;
     if (loc) subject += ` – (${loc})`;
 
+    const equipmentHtml = (workerType === "Remote worker" && equipment)
+      ? `<b>Equipment Needed:</b><br>${equipment.replace(/\n/g, "<br>")}<br><br>`
+      : "";
+
     body = `
 <b>New Hire Name:</b> ${newHireName}<br>
 <b>New Hire Title:</b> ${newHireTitle}<br>
 <b>Worker Type:</b> ${workerType}<br>
-${workerType === "Remote worker"
-  ? `<b>Equipment Needed:</b><br>${equipment.replace(/\n/g, "<br>")}<br><br>`
-  : ""
-}
+${equipmentHtml}
 <b>Requested by (Contact):</b> ${contact}<br>
 <b>Department:</b> ${dept}<br>
 <b>Category:</b> ${cat}<br>
 ${loc ? `<b>Location Code:</b> ${loc}<br>` : ""}
 <br>
 <b>Description / Additional Details:</b><br>
-${desc.replace(/\n/g, "<br>")}
+${(desc || "").replace(/\n/g, "<br>")}
     `;
   } else {
-    // Existing subject + body
+    // Standard ticket
     subject = `Ticket – ${dept}: ${cat}`;
     if (detail) subject += ` – ${detail}`;
     if (loc) subject += ` – (${loc})`;
@@ -441,36 +486,86 @@ ${sub ? `<b>Subcategory:</b> ${sub}<br>` : ""}
 ${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
 <br>
 <b>Description:</b><br>
-${desc.replace(/\n/g, "<br>")}
+${(desc || "").replace(/\n/g, "<br>")}
     `;
   }
 
-  const email = DEPARTMENT_EMAIL_MAP[dept];
+  const host = getHostEnvironment();
+  console.log("Submitting ticket; detected host:", host);
 
-  // Outlook flow
-  if (S1P_HOST === "outlook") {
-    Office.context.mailbox.displayNewMessageForm({
-      toRecipients: [email],
-      subject: subject,
-      htmlBody: body
-    });
+  if (host === "outlook") {
+    try {
+      Office.context.mailbox.displayNewMessageForm({
+        toRecipients: [email],
+        subject: subject,
+        htmlBody: body
+      });
 
-    try { Office.context.ui.messageParent("close"); } catch (e) {}
+      try {
+        if (Office.context.ui && Office.context.ui.messageParent) {
+          Office.context.ui.messageParent("close");
+        }
+      } catch (e) {
+        // ignore
+      }
+    } catch (err) {
+      console.error("displayNewMessageForm failed:", err);
+      alert("Unable to open a new message in Outlook. Please try again.");
+    }
     return;
   }
 
-  // Teams flow
-  if (S1P_HOST === "teams") {
-    alert("✔ Ticket form submitted in Teams.\n(Next step: connect to Webhook/API backend)");
-
+  if (host === "teams") {
+    // Future: send to webhook/API; for now just log
+    alert("✔ Ticket captured in Teams context.\n(Next step: wire up backend / webhook.)");
     console.log("Teams submission payload:", {
       dept, cat, sub, subsub, loc, contact, callback, workstation,
       newHireName, newHireTitle, workerType, equipment, desc
     });
-
     return;
   }
 
-  // Web/standalone
-  alert("Form submitted — not in Outlook or Teams.");
+  // Standalone / web test
+  alert("Form submitted in web/standalone mode.\n(Outlook-specific email compose is disabled here.)");
+  console.log("Web submission payload:", {
+    dept, cat, sub, subsub, loc, contact, callback, workstation,
+    newHireName, newHireTitle, workerType, equipment, desc
+  });
+}
+
+/* ------------------------------------------------
+   INITIALIZATION
+--------------------------------------------------*/
+
+// DOM wiring (works in all hosts)
+document.addEventListener("DOMContentLoaded", () => {
+  initFormWiring();
+});
+
+// Outlook-specific initialization
+if (window.Office && Office.onReady) {
+  Office.onReady().then(info => {
+    console.log("Office.onReady:", info);
+    if (info.host === Office.HostType.Outlook) {
+      initContactAutofill();
+    }
+  }).catch(err => {
+    console.log("Office.onReady failed:", err);
+  });
+}
+
+// Optional Teams init for future use; safe even when not in Teams
+try {
+  if (window.microsoftTeams && microsoftTeams.app) {
+    microsoftTeams.app.initialize().then(() => {
+      console.log("S1P Support: Teams SDK initialized");
+      microsoftTeams.app.getContext().then(ctx => {
+        console.log("Teams context:", ctx);
+      });
+    }).catch(err => {
+      console.log("Teams initialization failed:", err);
+    });
+  }
+} catch (e) {
+  // ignore
 }
