@@ -7,7 +7,7 @@
   <!-- Existing Outlook Add-in script (do NOT remove) -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-  <!-- Teams SDK (safe to load even inside Outlook) -->
+  <!-- NEW: Teams SDK (safe to load even inside Outlook) -->
   <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
 
   <style>
@@ -135,7 +135,7 @@
   <label for="contactName">Contact Name (Required):</label>
   <input id="contactName" placeholder="Your name" />
 
-  <!-- WORKSTATION (IT only, non–New Hire) -->
+  <!-- WORKSTATION (IT only) -->
   <div id="ws-section" class="hidden">
     <label for="workstation">Workstation Name (Required for IT):</label>
     <input id="workstation" placeholder="e.g. FRONTDESK01, CLINICPC05" />
@@ -145,39 +145,12 @@
   </div>
 
   <!-- CALLBACK -->
-  <div id="callback-section">
-    <label for="callback">Callback Number (Required):</label>
-    <input id="callback" placeholder="e.g. 555-123-4567" />
-  </div>
+  <label for="callback">Callback Number (Required):</label>
+  <input id="callback" placeholder="e.g. 555-123-4567" />
 
   <!-- LOCATION -->
-  <div id="location-section">
-    <label for="location">Location Code:</label>
-    <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
-  </div>
-
-  <!-- NEW HIRE SECTION (IT: User Account Creation / New Hire Setup) -->
-  <div id="newhire-section" class="hidden">
-    <label for="newHireName">New Hire Name:</label>
-    <input id="newHireName" placeholder="e.g. Jane Doe" />
-
-    <label for="newHireTitle">New Hire Title:</label>
-    <input id="newHireTitle" placeholder="e.g. Dental Assistant, IT Support, Office Manager" />
-
-    <label for="newHireWorkerType">Worker Type:</label>
-    <select id="newHireWorkerType">
-      <option value="">-- Select worker type --</option>
-      <option value="Remote Worker">Remote Worker</option>
-      <option value="Support Center Staff">Support Center Staff</option>
-      <option value="Practice Staff">Practice Staff</option>
-    </select>
-
-    <div id="remote-equipment-section" class="hidden">
-      <label for="remoteEquipment">Equipment Needed (Remote Worker):</label>
-      <textarea id="remoteEquipment" rows="4"
-        placeholder="e.g. Laptop, Dock, 2 Monitors, Headset, Keyboard/Mouse, Webcam, etc."></textarea>
-    </div>
-  </div>
+  <label for="location">Location Code:</label>
+  <input id="location" placeholder="e.g. END073, PO0806, OS0609" />
 
   <!-- DESCRIPTION -->
   <label for="description">Description:</label>
@@ -192,24 +165,28 @@
 
 </div>
 
-<!-- Existing Outlook/Teams logic -->
+<!-- Existing Outlook logic -->
 <script src="taskpane.js"></script>
 
-<!-- Host detection bootstrap -->
+<!-- NEW: Add Teams + Outlook host detection bootstrap -->
 <script>
   (function () {
     const isTeams = !!(window.microsoftTeams && microsoftTeams.app);
 
     if (isTeams) {
+      // Initialize Teams — SAFE, DOES NOT AFFECT OUTLOOK
       microsoftTeams.app.initialize().then(() => {
         console.log("S1P Support: Running inside Microsoft Teams");
 
+        // Tell Teams the tab is ready
         if (microsoftTeams.app.notifySuccess) {
           microsoftTeams.app.notifySuccess();
         }
 
+        // Get Teams context (optional)
         microsoftTeams.app.getContext().then(ctx => {
           console.log("Teams Context:", ctx);
+          // You can expose this to taskpane.js if needed
           window.s1pTeamsContext = ctx;
         });
       }).catch(err => {
@@ -217,6 +194,7 @@
       });
 
     } else if (window.Office && Office.onReady) {
+      // Outlook Add-in (unchanged)
       Office.onReady().then(() => {
         console.log("S1P Support: Running inside Outlook add-in");
       });
