@@ -10,6 +10,11 @@ function getHostEnvironment() {
 let S1P_HOST = getHostEnvironment();
 
 /* ------------------------------------------------
+   CONSTANTS
+--------------------------------------------------*/
+const IT_NEW_HIRE_CATEGORY = "User account creation / new hire setup";
+
+/* ------------------------------------------------
    DEPARTMENT → EMAIL ROUTING
 --------------------------------------------------*/
 const DEPARTMENT_EMAIL_MAP = {
@@ -34,6 +39,7 @@ const CATEGORY_MAP = {
     "Security",
     "RingCentral",
     "Acumen",
+    IT_NEW_HIRE_CATEGORY,          // 🔹 new category
     "Other"
   ],
 
@@ -237,6 +243,7 @@ function fillSelect(select, values) {
 }
 
 function show(el, yes) {
+  if (!el) return;
   el.classList[yes ? "remove" : "add"]("hidden");
 }
 
@@ -252,8 +259,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const subsubLabel = document.getElementById("subsubcategory-label");
   const ws = document.getElementById("ws-section");
 
+  const newHireSection = document.getElementById("newhire-section");
+  const equipmentSection = document.getElementById("equipment-section");
+  const workerTypeSelect = document.getElementById("worker-type");
+  const callbackSection = document.getElementById("callback-section");
+  const locationSection = document.getElementById("location-section");
+
   clearSelect(cat, "-- Select a category --");
 
+  // Department change
   dept.addEventListener("change", () => {
     clearSelect(cat, "-- Select a category --");
     clearSelect(sub, "-- Select a subcategory --");
@@ -264,6 +278,12 @@ document.addEventListener("DOMContentLoaded", () => {
     show(subsub, false);
     show(subsubLabel, false);
 
+    // reset special sections
+    show(newHireSection, false);
+    show(equipmentSection, false);
+    show(callbackSection, true);
+    show(locationSection, true);
+
     if (CATEGORY_MAP[dept.value]) {
       fillSelect(cat, CATEGORY_MAP[dept.value]);
     }
@@ -271,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
     show(ws, dept.value === "IT");
   });
 
+  // Category change
   cat.addEventListener("change", () => {
     clearSelect(sub, "-- Select a subcategory --");
     clearSelect(subsub, "-- Select an issue type --");
@@ -282,8 +303,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const deptVal = dept.value;
     const catVal = cat.value;
+    const isIT = deptVal === "IT";
+    const isNewHire = isIT && catVal === IT_NEW_HIRE_CATEGORY;
 
-    if (deptVal === "IT") {
+    // Reset new hire / visibility
+    show(newHireSection, false);
+    show(equipmentSection, false);
+
+    if (isNewHire) {
+      // New hire: hide workstation, callback, location; show new hire fields
+      show(ws, false);
+      show(callbackSection, false);
+      show(locationSection, false);
+      show(newHireSection, true);
+      // No subcategories or issue type for new hire
+      return;
+    }
+
+    // Non–new-hire: restore callback/location and ws as usual
+    show(callbackSection, true);
+    show(locationSection, true);
+    show(ws, isIT);
+
+    // Existing IT logic
+    if (isIT) {
       if (IT_SOFTWARE_MAP[catVal]) {
         fillSelect(sub, IT_SOFTWARE_MAP[catVal]);
         show(sub, true);
@@ -300,6 +343,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Worker Type change (for new hire) – show equipment only for Remote worker
+  if (workerTypeSelect) {
+    workerTypeSelect.addEventListener("change", () => {
+      show(equipmentSection, workerTypeSelect.value === "Remote worker");
+    });
+  }
+
+  // Submit handler
   document.getElementById("submitBtn").addEventListener("click", submitTicket);
 });
 
@@ -313,13 +364,13 @@ Office.onReady(info => {
     const profile = Office.context.mailbox.userProfile;
     const nameField = document.getElementById("contactName");
 
-    if (profile && profile.displayName) {
+    if (profile && profile.displayName && nameField) {
       nameField.value = profile.displayName;
       localStorage.setItem("lastContactName", profile.displayName);
     }
 
     const saved = localStorage.getItem("lastContactName");
-    if (saved) nameField.value = saved;
+    if (saved && nameField) nameField.value = saved;
   } catch (e) {
     console.log("Name autofill failed:", e);
   }
@@ -327,8 +378,6 @@ Office.onReady(info => {
 
 /* ------------------------------------------------
    SUBMIT LOGIC
-   Outlook → Opens email draft
-   Teams → Calls webhook or future API endpoint
 --------------------------------------------------*/
 function submitTicket() {
   const dept = document.getElementById("department").value;
@@ -338,16 +387,50 @@ function submitTicket() {
   const loc = document.getElementById("location").value;
   const contact = document.getElementById("contactName").value;
   const callback = document.getElementById("callback").value;
-  const workstation = document.getElementById("workstation")?.value || "";
+  const workstationEl = document.getElementById("workstation");
+  const workstation = workstationEl ? workstationEl.value : "";
   const desc = document.getElementById("description").value;
+
+  const newHireName = document.getElementById("newhire-name")?.value.trim() || "";
+  const newHireTitle = document.getElementById("newhire-title")?.value.trim() || "";
+  const workerType = document.getElementById("worker-type")?.value || "";
+  const equipment = document.getElementById("equipment")?.value || "";
+
+  const isNewHire = dept === "IT" && cat === IT_NEW_HIRE_CATEGORY;
 
   const detail = [sub, subsub].filter(v => v).join(" – ");
 
-  let subject = `Ticket – ${dept}: ${cat}`;
-  if (detail) subject += ` – ${detail}`;
-  if (loc) subject += ` – (${loc})`;
+  let subject;
+  let body;
 
-  let body = `
+  if (isNewHire) {
+    // New Hire subject
+    subject = `New Hire – ${newHireName || "Name TBA"} – ${workerType || "Worker type"}`;
+    if (loc) subject += ` – (${loc})`;
+
+    body = `
+<b>New Hire Name:</b> ${newHireName}<br>
+<b>New Hire Title:</b> ${newHireTitle}<br>
+<b>Worker Type:</b> ${workerType}<br>
+${workerType === "Remote worker"
+  ? `<b>Equipment Needed:</b><br>${equipment.replace(/\n/g, "<br>")}<br><br>`
+  : ""
+}
+<b>Requested by (Contact):</b> ${contact}<br>
+<b>Department:</b> ${dept}<br>
+<b>Category:</b> ${cat}<br>
+${loc ? `<b>Location Code:</b> ${loc}<br>` : ""}
+<br>
+<b>Description / Additional Details:</b><br>
+${desc.replace(/\n/g, "<br>")}
+    `;
+  } else {
+    // Existing subject + body
+    subject = `Ticket – ${dept}: ${cat}`;
+    if (detail) subject += ` – ${detail}`;
+    if (loc) subject += ` – (${loc})`;
+
+    body = `
 <b>Contact Name:</b> ${contact}<br>
 <b>Callback Number:</b> ${callback}<br>
 ${dept === "IT" ? `<b>Workstation:</b> ${workstation}<br>` : ""}
@@ -359,11 +442,12 @@ ${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
 <br>
 <b>Description:</b><br>
 ${desc.replace(/\n/g, "<br>")}
-  `;
+    `;
+  }
 
   const email = DEPARTMENT_EMAIL_MAP[dept];
 
-  /* ---------- Outlook Flow (UNCHANGED) ---------- */
+  // Outlook flow
   if (S1P_HOST === "outlook") {
     Office.context.mailbox.displayNewMessageForm({
       toRecipients: [email],
@@ -371,24 +455,22 @@ ${desc.replace(/\n/g, "<br>")}
       htmlBody: body
     });
 
-    try { Office.context.ui.messageParent("close"); } catch {}
+    try { Office.context.ui.messageParent("close"); } catch (e) {}
     return;
   }
 
-  /* ---------- Teams Flow (NEW & SAFE) ---------- */
+  // Teams flow
   if (S1P_HOST === "teams") {
     alert("✔ Ticket form submitted in Teams.\n(Next step: connect to Webhook/API backend)");
 
-    // This is where you will later call:
-    // fetch("https://your-ticket-api/new", { method: "POST", body: JSON.stringify({...}) })
-
     console.log("Teams submission payload:", {
-      dept, cat, sub, subsub, loc, contact, callback, workstation, desc
+      dept, cat, sub, subsub, loc, contact, callback, workstation,
+      newHireName, newHireTitle, workerType, equipment, desc
     });
 
     return;
   }
 
-  /* ---------- Web/Standalone ---------- */
+  // Web/standalone
   alert("Form submitted — not in Outlook or Teams.");
 }
