@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <title>S1P Support Ticket</title>
 
-  <!-- Outlook Add-in script -->
+  <!-- Office.js for Outlook -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-  <!-- Teams SDK (safe even inside Outlook) -->
+  <!-- Teams SDK (safe even if not used by this manifest yet) -->
   <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
 
   <style>
@@ -24,6 +24,8 @@
       border-radius: 10px;
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      max-width: 520px;
+      margin: 0 auto;
     }
 
     h3 {
@@ -77,7 +79,9 @@
       background-color: #005a9e;
     }
 
-    .hidden { display: none; }
+    .hidden {
+      display: none;
+    }
 
     .inline-hint {
       font-size: 14px;
@@ -192,39 +196,8 @@
 
 </div>
 
-<!-- Existing Outlook / Teams logic -->
+<!-- All logic is in taskpane.js -->
 <script src="taskpane.js"></script>
-
-<script>
-  (function () {
-    const isTeams = !!(window.microsoftTeams && microsoftTeams.app);
-
-    if (isTeams) {
-      microsoftTeams.app.initialize().then(() => {
-        console.log("S1P Support: Running inside Microsoft Teams");
-
-        if (microsoftTeams.app.notifySuccess) {
-          microsoftTeams.app.notifySuccess();
-        }
-
-        microsoftTeams.app.getContext().then(ctx => {
-          console.log("Teams Context:", ctx);
-          window.s1pTeamsContext = ctx;
-        });
-      }).catch(err => {
-        console.error("Teams initialization failed:", err);
-      });
-
-    } else if (window.Office && Office.onReady) {
-      Office.onReady().then(() => {
-        console.log("S1P Support: Running inside Outlook add-in");
-      });
-    } else {
-      console.log("S1P Support: Running as standalone webpage");
-    }
-
-  })();
-</script>
 
 </body>
 </html>
