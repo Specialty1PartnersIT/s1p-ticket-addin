@@ -12,7 +12,7 @@ let S1P_HOST = getHostEnvironment();
 /* ------------------------------------------------
    CONSTANTS
 --------------------------------------------------*/
-const NEW_HIRE_CATEGORY = "User account creations / New hire setup";
+const NEW_HIRE_CATEGORY = "User Account Creation / New Hire Setup";
 
 /* ------------------------------------------------
    DEPARTMENT → EMAIL ROUTING
@@ -26,6 +26,7 @@ const DEPARTMENT_EMAIL_MAP = {
 
 /* ------------------------------------------------
    CATEGORY MAP (Per Department)
+   (IT now includes New Hire category)
 --------------------------------------------------*/
 const CATEGORY_MAP = {
   IT: [
@@ -223,7 +224,7 @@ const IT_OTHER_SUBCATEGORY_MAP = {
 };
 
 /* ------------------------------------------------
-   HELPERS
+   HELPER FUNCTIONS
 --------------------------------------------------*/
 function clearSelect(select, placeholder) {
   select.innerHTML = "";
@@ -243,7 +244,6 @@ function fillSelect(select, values) {
 }
 
 function show(el, yes) {
-  if (!el) return;
   el.classList[yes ? "remove" : "add"]("hidden");
 }
 
@@ -261,9 +261,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const callbackSection = document.getElementById("callback-section");
   const locationSection = document.getElementById("location-section");
+
   const newHireSection = document.getElementById("newhire-section");
-  const workerTypeSelect = document.getElementById("worker-type");
-  const equipmentSection = document.getElementById("equipment-section");
+  const newHireWorkerType = document.getElementById("newHireWorkerType");
+  const remoteEquipmentSection = document.getElementById("remote-equipment-section");
 
   clearSelect(cat, "-- Select a category --");
 
@@ -278,10 +279,17 @@ document.addEventListener("DOMContentLoaded", () => {
     show(subsub, false);
     show(subsubLabel, false);
 
+    // Reset new hire + remote sections
     show(newHireSection, false);
+    show(remoteEquipmentSection, false);
+    if (newHireWorkerType) newHireWorkerType.value = "";
+
+    // Show/hide workstation by department (IT only, but may be overridden by category)
+    show(ws, dept.value === "IT");
+
+    // Callback & location default visible
     show(callbackSection, true);
     show(locationSection, true);
-    show(ws, dept.value === "IT");
 
     if (CATEGORY_MAP[dept.value]) {
       fillSelect(cat, CATEGORY_MAP[dept.value]);
@@ -301,31 +309,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const deptVal = dept.value;
     const catVal = cat.value;
 
-    // Default: hide new hire section, show normal fields
+    // Reset new hire / equipment sections each time
     show(newHireSection, false);
-    show(callbackSection, true);
-    show(locationSection, true);
-    show(ws, deptVal === "IT");
+    show(remoteEquipmentSection, false);
+    if (newHireWorkerType) newHireWorkerType.value = "";
 
-    // Special case: IT New Hire
+    // NEW HIRE SPECIAL CASE
     if (deptVal === "IT" && catVal === NEW_HIRE_CATEGORY) {
       // Hide workstation, callback, location
       show(ws, false);
       show(callbackSection, false);
       show(locationSection, false);
 
-      // Hide subcategory controls
-      show(sub, false);
-      show(subLabel, false);
-      show(subsub, false);
-      show(subsubLabel, false);
-
-      // Show new hire section
+      // Show New Hire section
       show(newHireSection, true);
-      return;
+      return; // no sub/subsub for this category
     }
 
-    // Normal IT mapping
+    // Normal behavior for other IT / departments
+    // Restore callback/location visibility (if previously hidden by new hire)
+    show(callbackSection, true);
+    show(locationSection, true);
+
+    // Show/hide workstation for non–new hire IT
+    show(ws, deptVal === "IT");
+
     if (deptVal === "IT") {
       if (IT_SOFTWARE_MAP[catVal]) {
         fillSelect(sub, IT_SOFTWARE_MAP[catVal]);
@@ -343,10 +351,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Worker type change → show equipment only for Remote Worker
-  if (workerTypeSelect && equipmentSection) {
-    workerTypeSelect.addEventListener("change", () => {
-      show(equipmentSection, workerTypeSelect.value === "Remote Worker");
+  // Worker type change → show/hide remote equipment
+  if (newHireWorkerType) {
+    newHireWorkerType.addEventListener("change", () => {
+      if (newHireWorkerType.value === "Remote Worker") {
+        show(remoteEquipmentSection, true);
+      } else {
+        show(remoteEquipmentSection, false);
+      }
     });
   }
 
@@ -383,70 +395,67 @@ function submitTicket() {
   const cat = document.getElementById("category").value;
   const sub = document.getElementById("subcategory").value;
   const subsub = document.getElementById("subsubcategory").value;
-  const loc = document.getElementById("location").value;
-  const contact = document.getElementById("contactName").value;
-  const callback = document.getElementById("callback").value;
-  const workstationEl = document.getElementById("workstation");
-  const workstation = workstationEl ? workstationEl.value : "";
-  const desc = document.getElementById("description").value;
 
-  // New hire fields
-  const newHireName = (document.getElementById("newhire-name")?.value || "").trim();
-  const newHireTitle = (document.getElementById("newhire-title")?.value || "").trim();
-  const workerType = document.getElementById("worker-type")?.value || "";
-  const equipmentNeeded = (document.getElementById("equipment-needed")?.value || "").trim();
+  const loc = document.getElementById("location")?.value || "";
+  const contact = document.getElementById("contactName")?.value || "";
+  const callback = document.getElementById("callback")?.value || "";
+  const workstation = document.getElementById("workstation")?.value || "";
+  const desc = document.getElementById("description")?.value || "";
 
-  const isNewHire = (dept === "IT" && cat === NEW_HIRE_CATEGORY);
-  const email = DEPARTMENT_EMAIL_MAP[dept];
+  const newHireName = document.getElementById("newHireName")?.value || "";
+  const newHireTitle = document.getElementById("newHireTitle")?.value || "";
+  const newHireWorkerType = document.getElementById("newHireWorkerType")?.value || "";
+  const remoteEquipment = document.getElementById("remoteEquipment")?.value || "";
 
-  let subject = "";
-  let body = "";
+  let detail = [sub, subsub].filter(v => v).join(" – ");
 
-  if (isNewHire) {
-    // New Hire–style subject
-    subject = `New Hire – ${newHireName || "Name TBD"} – ${workerType || "Worker Type"}`;
+  let subject;
+
+  if (dept === "IT" && cat === NEW_HIRE_CATEGORY) {
+    // New Hire–specific subject
+    subject = `Ticket – IT: New Hire – ${newHireName || "Name TBD"}`;
+    if (newHireWorkerType) subject += ` – ${newHireWorkerType}`;
     if (loc) subject += ` – (${loc})`;
-
-    body = `
-<b>Request Type:</b> New Hire Setup<br>
-<b>New Hire Name:</b> ${newHireName}<br>
-<b>New Hire Title:</b> ${newHireTitle}<br>
-<b>Worker Type:</b> ${workerType}<br>
-${equipmentNeeded ? `<b>Equipment Needed:</b><br>${equipmentNeeded.replace(/\n/g,"<br>")}<br>` : ""}
-<br>
-<b>Requester:</b> ${contact}<br>
-<b>Callback Number:</b> ${callback}<br>
-<b>Location:</b> ${loc}<br>
-<b>Department:</b> ${dept}<br>
-<b>Category:</b> ${cat}<br>
-<br>
-<b>Additional Details:</b><br>
-${desc.replace(/\n/g, "<br>")}
-    `;
   } else {
-    const detail = [sub, subsub].filter(v => v).join(" – ");
-
+    // Original subject behavior
     subject = `Ticket – ${dept}: ${cat}`;
     if (detail) subject += ` – ${detail}`;
     if (loc) subject += ` – (${loc})`;
+  }
 
-    body = `
+  let body = `
 <b>Contact Name:</b> ${contact}<br>
+<b>Department:</b> ${dept}<br>
+<b>Category:</b> ${cat}<br>
+`;
+
+  if (dept === "IT" && cat === NEW_HIRE_CATEGORY) {
+    body += `
+<b>New Hire Name:</b> ${newHireName}<br>
+<b>New Hire Title:</b> ${newHireTitle}<br>
+<b>Worker Type:</b> ${newHireWorkerType}<br>
+${newHireWorkerType === "Remote Worker" ? `<b>Equipment Needed:</b> ${remoteEquipment}<br>` : ""}
+`;
+  } else {
+    body += `
 <b>Callback Number:</b> ${callback}<br>
 ${dept === "IT" ? `<b>Workstation:</b> ${workstation}<br>` : ""}
 <b>Location:</b> ${loc}<br>
-<b>Department:</b> ${dept}<br>
-<b>Category:</b> ${cat}<br>
 ${sub ? `<b>Subcategory:</b> ${sub}<br>` : ""}
 ${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
-<br>
-<b>Description:</b><br>
-${desc.replace(/\n/g, "<br>")}
-    `;
+`;
   }
 
+  body += `
+<br>
+<b>Description:</b><br>
+${(desc || "").replace(/\n/g, "<br>")}
+  `;
+
+  const email = DEPARTMENT_EMAIL_MAP[dept];
+
   /* ---------- Outlook Flow ---------- */
-  if (S1P_HOST === "outlook") {
+  if (S1P_HOST === "outlook" && Office && Office.context && Office.context.mailbox) {
     Office.context.mailbox.displayNewMessageForm({
       toRecipients: [email],
       subject: subject,
@@ -459,17 +468,16 @@ ${desc.replace(/\n/g, "<br>")}
 
   /* ---------- Teams Flow ---------- */
   if (S1P_HOST === "teams") {
-    alert("✔ Ticket form submitted in Teams.\n(Backend integration TBD).");
+    alert("✔ Ticket form submitted in Teams.\n(Backend integration can be added later.)");
 
     console.log("Teams submission payload:", {
-      dept, cat, sub, subsub, loc, contact, callback,
-      workstation, desc,
-      newHireName, newHireTitle, workerType, equipmentNeeded, isNewHire
+      dept, cat, sub, subsub, loc, contact, callback, workstation,
+      newHireName, newHireTitle, newHireWorkerType, remoteEquipment, desc
     });
 
     return;
   }
 
   /* ---------- Web/Standalone ---------- */
-  alert("Form submitted — not in Outlook or Teams.");
+  alert("Form submitted — not in Outlook or Teams.\n(Subject and body have been composed in JS.)");
 }
