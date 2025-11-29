@@ -10,11 +10,6 @@ function getHostEnvironment() {
 let S1P_HOST = getHostEnvironment();
 
 /* ------------------------------------------------
-   CONSTANTS
---------------------------------------------------*/
-const NEW_HIRE_CATEGORY = "User Account Creation / New Hire Setup";
-
-/* ------------------------------------------------
    DEPARTMENT → EMAIL ROUTING
 --------------------------------------------------*/
 const DEPARTMENT_EMAIL_MAP = {
@@ -26,7 +21,6 @@ const DEPARTMENT_EMAIL_MAP = {
 
 /* ------------------------------------------------
    CATEGORY MAP (Per Department)
-   (IT now includes New Hire category)
 --------------------------------------------------*/
 const CATEGORY_MAP = {
   IT: [
@@ -40,7 +34,6 @@ const CATEGORY_MAP = {
     "Security",
     "RingCentral",
     "Acumen",
-    NEW_HIRE_CATEGORY,
     "Other"
   ],
 
@@ -259,16 +252,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const subsubLabel = document.getElementById("subsubcategory-label");
   const ws = document.getElementById("ws-section");
 
-  const callbackSection = document.getElementById("callback-section");
-  const locationSection = document.getElementById("location-section");
-
-  const newHireSection = document.getElementById("newhire-section");
-  const newHireWorkerType = document.getElementById("newHireWorkerType");
-  const remoteEquipmentSection = document.getElementById("remote-equipment-section");
-
   clearSelect(cat, "-- Select a category --");
 
-  // Department change
   dept.addEventListener("change", () => {
     clearSelect(cat, "-- Select a category --");
     clearSelect(sub, "-- Select a subcategory --");
@@ -279,24 +264,13 @@ document.addEventListener("DOMContentLoaded", () => {
     show(subsub, false);
     show(subsubLabel, false);
 
-    // Reset new hire + remote sections
-    show(newHireSection, false);
-    show(remoteEquipmentSection, false);
-    if (newHireWorkerType) newHireWorkerType.value = "";
-
-    // Show/hide workstation by department (IT only, but may be overridden by category)
-    show(ws, dept.value === "IT");
-
-    // Callback & location default visible
-    show(callbackSection, true);
-    show(locationSection, true);
-
     if (CATEGORY_MAP[dept.value]) {
       fillSelect(cat, CATEGORY_MAP[dept.value]);
     }
+
+    show(ws, dept.value === "IT");
   });
 
-  // Category change
   cat.addEventListener("change", () => {
     clearSelect(sub, "-- Select a subcategory --");
     clearSelect(subsub, "-- Select an issue type --");
@@ -308,31 +282,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const deptVal = dept.value;
     const catVal = cat.value;
-
-    // Reset new hire / equipment sections each time
-    show(newHireSection, false);
-    show(remoteEquipmentSection, false);
-    if (newHireWorkerType) newHireWorkerType.value = "";
-
-    // NEW HIRE SPECIAL CASE
-    if (deptVal === "IT" && catVal === NEW_HIRE_CATEGORY) {
-      // Hide workstation, callback, location
-      show(ws, false);
-      show(callbackSection, false);
-      show(locationSection, false);
-
-      // Show New Hire section
-      show(newHireSection, true);
-      return; // no sub/subsub for this category
-    }
-
-    // Normal behavior for other IT / departments
-    // Restore callback/location visibility (if previously hidden by new hire)
-    show(callbackSection, true);
-    show(locationSection, true);
-
-    // Show/hide workstation for non–new hire IT
-    show(ws, deptVal === "IT");
 
     if (deptVal === "IT") {
       if (IT_SOFTWARE_MAP[catVal]) {
@@ -350,17 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-
-  // Worker type change → show/hide remote equipment
-  if (newHireWorkerType) {
-    newHireWorkerType.addEventListener("change", () => {
-      if (newHireWorkerType.value === "Remote Worker") {
-        show(remoteEquipmentSection, true);
-      } else {
-        show(remoteEquipmentSection, false);
-      }
-    });
-  }
 
   document.getElementById("submitBtn").addEventListener("click", submitTicket);
 });
@@ -389,73 +327,44 @@ Office.onReady(info => {
 
 /* ------------------------------------------------
    SUBMIT LOGIC
+   Outlook → Opens email draft
+   Teams → Calls webhook or future API endpoint
 --------------------------------------------------*/
 function submitTicket() {
   const dept = document.getElementById("department").value;
   const cat = document.getElementById("category").value;
   const sub = document.getElementById("subcategory").value;
   const subsub = document.getElementById("subsubcategory").value;
-
-  const loc = document.getElementById("location")?.value || "";
-  const contact = document.getElementById("contactName")?.value || "";
-  const callback = document.getElementById("callback")?.value || "";
+  const loc = document.getElementById("location").value;
+  const contact = document.getElementById("contactName").value;
+  const callback = document.getElementById("callback").value;
   const workstation = document.getElementById("workstation")?.value || "";
-  const desc = document.getElementById("description")?.value || "";
+  const desc = document.getElementById("description").value;
 
-  const newHireName = document.getElementById("newHireName")?.value || "";
-  const newHireTitle = document.getElementById("newHireTitle")?.value || "";
-  const newHireWorkerType = document.getElementById("newHireWorkerType")?.value || "";
-  const remoteEquipment = document.getElementById("remoteEquipment")?.value || "";
+  const detail = [sub, subsub].filter(v => v).join(" – ");
 
-  let detail = [sub, subsub].filter(v => v).join(" – ");
-
-  let subject;
-
-  if (dept === "IT" && cat === NEW_HIRE_CATEGORY) {
-    // New Hire–specific subject
-    subject = `Ticket – IT: New Hire – ${newHireName || "Name TBD"}`;
-    if (newHireWorkerType) subject += ` – ${newHireWorkerType}`;
-    if (loc) subject += ` – (${loc})`;
-  } else {
-    // Original subject behavior
-    subject = `Ticket – ${dept}: ${cat}`;
-    if (detail) subject += ` – ${detail}`;
-    if (loc) subject += ` – (${loc})`;
-  }
+  let subject = `Ticket – ${dept}: ${cat}`;
+  if (detail) subject += ` – ${detail}`;
+  if (loc) subject += ` – (${loc})`;
 
   let body = `
 <b>Contact Name:</b> ${contact}<br>
-<b>Department:</b> ${dept}<br>
-<b>Category:</b> ${cat}<br>
-`;
-
-  if (dept === "IT" && cat === NEW_HIRE_CATEGORY) {
-    body += `
-<b>New Hire Name:</b> ${newHireName}<br>
-<b>New Hire Title:</b> ${newHireTitle}<br>
-<b>Worker Type:</b> ${newHireWorkerType}<br>
-${newHireWorkerType === "Remote Worker" ? `<b>Equipment Needed:</b> ${remoteEquipment}<br>` : ""}
-`;
-  } else {
-    body += `
 <b>Callback Number:</b> ${callback}<br>
 ${dept === "IT" ? `<b>Workstation:</b> ${workstation}<br>` : ""}
 <b>Location:</b> ${loc}<br>
+<b>Department:</b> ${dept}<br>
+<b>Category:</b> ${cat}<br>
 ${sub ? `<b>Subcategory:</b> ${sub}<br>` : ""}
 ${subsub ? `<b>Issue Type:</b> ${subsub}<br>` : ""}
-`;
-  }
-
-  body += `
 <br>
 <b>Description:</b><br>
-${(desc || "").replace(/\n/g, "<br>")}
+${desc.replace(/\n/g, "<br>")}
   `;
 
   const email = DEPARTMENT_EMAIL_MAP[dept];
 
-  /* ---------- Outlook Flow ---------- */
-  if (S1P_HOST === "outlook" && Office && Office.context && Office.context.mailbox) {
+  /* ---------- Outlook Flow (UNCHANGED) ---------- */
+  if (S1P_HOST === "outlook") {
     Office.context.mailbox.displayNewMessageForm({
       toRecipients: [email],
       subject: subject,
@@ -466,18 +375,20 @@ ${(desc || "").replace(/\n/g, "<br>")}
     return;
   }
 
-  /* ---------- Teams Flow ---------- */
+  /* ---------- Teams Flow (NEW & SAFE) ---------- */
   if (S1P_HOST === "teams") {
-    alert("✔ Ticket form submitted in Teams.\n(Backend integration can be added later.)");
+    alert("✔ Ticket form submitted in Teams.\n(Next step: connect to Webhook/API backend)");
+
+    // This is where you will later call:
+    // fetch("https://your-ticket-api/new", { method: "POST", body: JSON.stringify({...}) })
 
     console.log("Teams submission payload:", {
-      dept, cat, sub, subsub, loc, contact, callback, workstation,
-      newHireName, newHireTitle, newHireWorkerType, remoteEquipment, desc
+      dept, cat, sub, subsub, loc, contact, callback, workstation, desc
     });
 
     return;
   }
 
   /* ---------- Web/Standalone ---------- */
-  alert("Form submitted — not in Outlook or Teams.\n(Subject and body have been composed in JS.)");
+  alert("Form submitted — not in Outlook or Teams.");
 }
